@@ -218,3 +218,6 @@ session.vim
 Output/
 List/
 Crazepony.uvgui.Administrator
+Crazepony.uvopt
+Crazepony.uvproj
+Crazepony_Crazepony.dep
