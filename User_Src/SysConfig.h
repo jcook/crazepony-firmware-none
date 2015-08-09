@@ -22,6 +22,6 @@ extern uint8_t btSrc;
 //	;
 //}SystemConfig_t;
 
-
+#define TESTING
 #endif
 

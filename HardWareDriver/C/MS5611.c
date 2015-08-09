@@ -14,29 +14,26 @@
 #define SCPressure  0x03	  //开始转换 气压
 #define SCPressureing  0x04	  //正在转换气压值
 
-#define MOVAVG_SIZE  10	   //保存最近10组数据  5
-
+/* store the recent data */
+#define MOVAVG_SIZE  	5
+#define START_PA_LOOP	1
 static uint8_t  Now_doing = SCTemperature;	//当前转换状态
 static uint16_t PROM_C[MS561101BA_PROM_REG_COUNT]; //标定值存放
 static uint32_t Current_delay=0;	    //转换延时时间 us 
 static uint32_t Start_Convert_Time; //启动转换时的 时间 us 
-static int32_t  tempCache;
+static uint32_t  D1, D2;
 
 static float Alt_Offset_m = 0;
 
-//
-#define PA_OFFSET_INIT_NUM 50	
-
-static float Alt_offset_Pa=0; //存放着0米(离起飞所在平面)时 对应的气压值  这个值存放上电时的气压值 
-double paOffsetNum = 0; 
-uint16_t  paInitCnt=0;
-uint8_t paOffsetInited=0;
+//存放着0米(离起飞所在平面)时 对应的气压值  这个值存放上电时的气压值
+// !0 means is initialized
+float Alt_offset_Pa = 0;
 
 //interface for outside 
 uint8_t Baro_ALT_Updated = 0; //气压计高度更新完成标志。
 //units (Celsius degrees*100, mbar*100  ).
 //单位 [温度 度] [气压 帕]  [高度 米] 
-volatile float MS5611_Temperature,MS5611_Pressure,MS5611_Altitude,MS5611_VerticalSpeed;
+volatile float MS5611_VerticalSpeed;
 
 // 延时表单位 us 	  不同的采样精度对应不同的延时值
 uint32_t MS5611_Delay_us[9] = {
@@ -52,30 +49,46 @@ uint32_t MS5611_Delay_us[9] = {
 };
 
 // FIFO 队列					
-static float Temp_buffer[MOVAVG_SIZE],Press_buffer[MOVAVG_SIZE],Alt_buffer[MOVAVG_SIZE];
-static uint8_t temp_index=0,press_index=0; //队列指针
+static float Temp_buffer[MOVAVG_SIZE], Press_buffer[MOVAVG_SIZE];
+static uint8_t array_index = 0;
 
-//添加一个新的值到 温度队列 进行滤波
-void MS561101BA_NewTemp(float val) 
+#define MS5611_RESULT_TEMP	0
+#define MS5611_RESULT_PRESS	1
+#define MS5611_RESULT_ALT	2
+#define MS5611_RESULT_NUM	3
+float MS5611_Result[MS5611_RESULT_NUM];
+
+float MS561101BA_getAvg(float * buff, int size);
+void MS561101BA_setResult(void);
+void MS561101BA_clearResult(void);
+float MS561101BA_get_altitude(void);
+/* return D1 or D2 depneds on timing. */
+uint32_t MS561101BA_GetD(void);
+
+/* insert temp & pressure group. */
+void MS561101BA_NewElement(float temp, float pressure)
 {
-	Temp_buffer[temp_index] = val;
-	temp_index = (temp_index + 1) % MOVAVG_SIZE;
+	if (array_index == 0) {
+		//Baro_ALT_Updated = 0;
+	}
+	Temp_buffer[array_index] = temp;	
+	Press_buffer[array_index] = pressure;
+	array_index = (array_index + 1) % MOVAVG_SIZE;
+	
+	if (array_index == 0) {
+		MS561101BA_setResult();
+	}
 }
 
-//添加一个新的值到 气压队列 进行滤波
-void MS561101BA_NewPress(float val)
+void MS561101BA_setResult(void)
 {
-	Press_buffer[press_index] = val;
-	press_index = (press_index + 1) % MOVAVG_SIZE;
-}
-
-//添加一个新的值到 高度队列 进行滤波
-void MS561101BA_NewAlt(float val) 
-{
-	int16_t i;
-	for(i=1;i<MOVAVG_SIZE;i++)
-		Alt_buffer[i-1] = Alt_buffer[i];
-	Alt_buffer[MOVAVG_SIZE-1] = val;
+	MS5611_Result[MS5611_RESULT_TEMP] = MS561101BA_getAvg(Temp_buffer, MOVAVG_SIZE);
+	MS5611_Result[MS5611_RESULT_PRESS] = MS561101BA_getAvg(Press_buffer, MOVAVG_SIZE);
+	MS5611_Result[MS5611_RESULT_ALT] = MS561101BA_get_altitude();
+	
+	Baro_ALT_Updated = 0xff; 	//高度更新 完成。
+	
+	//printf("PA: %5.2f %5.2f %5.2f\r\n", MS5611_Result[MS5611_RESULT_TEMP], MS5611_Result[MS5611_RESULT_PRESS], MS5611_Result[MS5611_RESULT_ALT]);
 }
 
 //读取队列的平均值
@@ -83,12 +96,13 @@ float MS561101BA_getAvg(float * buff, int size)
 {
 	float sum = 0.0;
 	int i;
-	for(i=0; i<size; i++) 
+	for(i=0; i < size; i++) 
 	{
 		sum += buff[i];
 	}
 	return sum / size;
 }
+
 
 /**************************实现函数********************************************
 *函数原型:		void MS561101BA_readPROM(void)
@@ -209,14 +223,13 @@ void MS5611_Init(void)
 }
 
 /**************************实现函数********************************************
-*函数原型:		void MS561101BA_GetTemperature(void)
+*函数原型:		void MS561101BA_GetD2(void)
 *功　　能:	    读取 温度转换结果	 
 *******************************************************************************/
-void MS561101BA_GetTemperature(void)
+uint32_t MS561101BA_GetD(void)
 {	
-	tempCache = MS561101BA_getConversion();	
+	return MS561101BA_getConversion();	
 }
-
 
 /**************************实现函数********************************************
 *函数原型:		float MS561101BA_get_altitude(void)
@@ -224,33 +237,34 @@ void MS561101BA_GetTemperature(void)
 *******************************************************************************/
 float MS561101BA_get_altitude(void)
 {
-	static float Altitude,AltPre;
+	float Altitude;
+	static uint8_t cnt = 0;
+#ifdef ALTI_SPEED
+	static float AltPre;
 	float dz,dt;
 	uint32_t current=0;
 	static uint32_t tp=0;
-
+#endif
 	// 是否初始化过0米气压值？
-	if(Alt_offset_Pa == 0)
-	{ 
-		if(paInitCnt > PA_OFFSET_INIT_NUM)
-		{
-			Alt_offset_Pa = paOffsetNum / paInitCnt;
-			paOffsetInited=1;
+	// FIXME: if cnt is small, first PA is not suitable.
+	
+	if(Alt_offset_Pa == 0) {
+		if (MS5611_Result[MS5611_RESULT_PRESS]) {			
+			cnt++;
+			if (cnt == START_PA_LOOP) {
+				Alt_offset_Pa = MS5611_Result[MS5611_RESULT_PRESS];
+				//printf("firstPa: %f\r\n", Alt_offset_Pa);
+			}
 		}
-		else
-			paOffsetNum += MS5611_Pressure;
-		
-		paInitCnt++;
-		
-		Altitude = 0; //高度 为 0
-		
+		Altitude = 0; //高度 为 0		
 		return Altitude;
 	}
+	
 	//计算相对于上电时的位置的高度值 。单位为m
-	Altitude = 4433000.0 * (1 - pow((MS5611_Pressure / Alt_offset_Pa), 0.1903))*0.01f;
+	Altitude = 4433000.0 * (1 - pow((MS5611_Result[MS5611_RESULT_PRESS] / Alt_offset_Pa), 0.1903))*0.01f;
 	Altitude = Altitude + Alt_Offset_m ;  //加偏置
 
-	#ifdef ALTI_SPEED
+#ifdef ALTI_SPEED
 	current=micros();
 	dt=(tp>0)?((current - tp)/1000000.0f):0;
 	tp=current;
@@ -259,170 +273,173 @@ float MS561101BA_get_altitude(void)
 	if(dt>0)
 		MS5611_VerticalSpeed =  dz / dt;
 #endif
-	
+	printf("hPA: %f / %f / %.2f\r\n", MS5611_Result[MS5611_RESULT_PRESS], Alt_offset_Pa, Altitude);
 	return Altitude; 
 }
 
-/**************************实现函数********************************************
-*函数原型:		void MS561101BA_getPressure(void)
-*功　　能:	    读取 气压转换结果 并做补偿修正	 
-*******************************************************************************/
-//static float lastPress=0,newPress=0;
-//static float press_limit_coe = 1;
-
-void MS561101BA_getPressure(void) 
+/* Calculate temperature and pressure. */
+void MS561101BA_Calculate(uint32_t D1, uint32_t D2)
 {
-	int64_t off,sens;
-	int64_t TEMP,T2,Aux_64,OFF2,SENS2;  // 64 bits
-	int32_t rawPress = MS561101BA_getConversion();
-	int64_t dT  = tempCache - (((int32_t)PROM_C[4]) << 8);
+	int32_t dT, TEMP, P;
+	int64_t OFF, SENS;
 	
-	TEMP = 2000 + (dT * (int64_t)PROM_C[5])/8388608;
-	off  = (((int64_t)PROM_C[1]) << 16) + ((((int64_t)PROM_C[3]) * dT) >> 7);
-	sens = (((int64_t)PROM_C[0]) << 15) + (((int64_t)(PROM_C[2]) * dT) >> 8);
-	
+	dT  = D2 - (((int32_t)PROM_C[4]) << 8);
+	TEMP = 2000 + ((dT * (int64_t)PROM_C[5]) >> 23);
+#if 0	
 	if (TEMP < 2000)
 	{   // second order temperature compensation
-		T2 = (((int64_t)dT)*dT) >> 31;
-		Aux_64 = (TEMP-2000)*(TEMP-2000);
-		OFF2 = (5*Aux_64)>>1;
-		SENS2 = (5*Aux_64)>>2;
-		TEMP = TEMP - T2;
-		off = off - OFF2;
-		sens = sens - SENS2;
+
 	}
-
-	//------------- 气压修正 ----------------
-//	newPress=(((((int64_t)rawPress) * sens) >> 21) - off) / 32768;
-//	
-//	press_limit_coe = 1.0f; 
-//	
-//	//机动时限制气压值降低（气压高度增高）
-//	if(ALT_LOCK_FLAG == 0xff && (Math_abs(IMU_Pitch)>15 || Math_abs(IMU_Roll)>15))
-//	{		
-//		press_limit_coe = 0.01f;   //0.005
-//		if(newPress<lastPress)
-//			newPress = (1 - press_limit_coe) * lastPress + press_limit_coe * newPress; 
-//	}
-
-//	lastPress = newPress;
-//	
-//	MS5611_Pressure = newPress;
+#endif	
+	OFF  = (((int64_t)PROM_C[1]) << 16) + ((((int64_t)PROM_C[3]) * dT) >> 7);
+	SENS = (((int64_t)PROM_C[0]) << 15) + ((((int64_t)PROM_C[2]) * dT) >> 8);
 	
-	//原始的方法
-	MS5611_Pressure = (((((int64_t)rawPress) * sens) >> 21) - off) / 32768;
-
-	//温度队列处理
-	MS561101BA_NewTemp(TEMP*0.01f);
+	P = (int32_t)((((((int64_t)D1) * SENS) >> 21) - OFF) >> 15);
 	
-	MS5611_Temperature = MS561101BA_getAvg(Temp_buffer,MOVAVG_SIZE); //0.01c
-	
-	MS5611_Altitude = MS561101BA_get_altitude(); // 单位：m 
-	
+	/* To display value */
+	MS561101BA_NewElement(TEMP * 0.01f, P * 0.01f);
 }
+#if 1
+/* for testing only */
+void MS5611_ReadTemperature(void)
+{
+	int32_t dT, TEMP, i;
+	
+	MS561101BA_startConversion(MS561101BA_D2 + MS5611Temp_OSR);
+	Current_delay = MS5611_Delay_us[MS5611Temp_OSR] ;//转换时间
+	Start_Convert_Time = micros(); //计时开始
+	while (!((micros()-Start_Convert_Time) > Current_delay))
+		;
+	
+	D2 = MS561101BA_GetD();
+	dT  = D2 - (((int32_t)PROM_C[4]) << 8);
+	TEMP = 2000 + ((dT * (int64_t)PROM_C[5]) >> 23);
+	printf("temp: %5.2f ", TEMP * 0.01f);
+	
+	i = 50000;
+	
+	while (i--)
+		;
+}
+/* for testing only */
+void MS5611_ReadTemperatureAndPressure(void)
+{
+	float Alt;
+	int32_t dT, TEMP, P, i;
+	int64_t OFF, SENS;
+	static int32_t P_min = 0, P_max = 0, T_min = 0, T_max = 0, dP = 0, dTEMP = 0, firstP = 0;
+	
+	
+	MS561101BA_startConversion(MS561101BA_D2 + MS5611Temp_OSR);
+	Current_delay = MS5611_Delay_us[MS5611Temp_OSR] ;//转换时间
+	Start_Convert_Time = micros(); //计时开始
+	
+	
+	while (!((micros()-Start_Convert_Time) > Current_delay))
+		;
+	D2 = MS561101BA_GetD();
+	
+	MS561101BA_startConversion(MS561101BA_D1 + MS5611Press_OSR);
+	Current_delay = MS5611_Delay_us[MS5611Press_OSR];//转换时间
+	Start_Convert_Time = micros();//计时开始	
+	while (!((micros()-Start_Convert_Time) > Current_delay))
+		;
+	
+	D1 = MS561101BA_GetD();
+	
+	dT  = D2 - (((int32_t)PROM_C[4]) << 8);
+	TEMP = 2000 + ((dT * (int64_t)PROM_C[5]) >> 23);
 
+#if 0	
+	if (TEMP < 2000)
+	{   // second order temperature compensation
 
-/**************************实现函数********************************************
-*函数原型:		void MS5611BA_Routing(void)
-*功　　能:	    MS5611BA 的运行程序 ，需要定期调用 以更新气压值和温度值。 
-*******************************************************************************/
+	}
+#endif	
+	OFF  = (((int64_t)PROM_C[1]) << 16) + ((((int64_t)PROM_C[3]) * dT) >> 7);
+	SENS = (((int64_t)PROM_C[0]) << 15) + ((((int64_t)PROM_C[2]) * dT) >> 8);
+	
+	P = (int32_t)((((((int64_t)D1) * SENS) >> 21) - OFF) >> 15);
+
+	if (P_min == 0) {
+		P_min = P_max = P;
+		T_min = T_max = TEMP;
+		firstP = P;
+	}
+	
+	if (P > P_max)
+		P_max = P;
+	if (P < P_min)
+		P_min = P;
+	if (TEMP > T_max)
+		T_max = TEMP;
+	if (TEMP < T_min)
+		T_min = TEMP;
+#if 0
+	if (dP < (P_max - P_min)) {
+		dP = P_max - P_min;
+		if (dP != 0)
+			printf("***** dP %d ******\r\n", dP);
+	}
+	if (dTEMP < (T_max - T_min)) {
+		dTEMP = T_max - T_min;
+		if (dTEMP != 0)
+			printf(">>>>>> dT %d <<<<<<<\r\n", dTEMP);
+	}
+#endif
+	
+	Alt = 4433000.0 * (1 - pow(((float)P / (float)firstP), 0.1903))*0.01f;
+	
+	printf("hPA: %d / %d / %.2f", P, firstP, Alt);
+	
+	i = 0xFFFFF;
+	
+	while (i--)
+		;
+}
+#endif
+
 void MS5611_Thread(void) 
 {
-	switch(Now_doing)
-	{ //查询状态 看看我们现在 该做些什么？
-		case SCTemperature:  //启动温度转换
-			MS561101BA_startConversion(MS561101BA_D2 + MS5611Temp_OSR);
-			Current_delay = MS5611_Delay_us[MS5611Temp_OSR] ;//转换时间
-			Start_Convert_Time = micros(); //计时开始
-			Now_doing = CTemperatureing;//下一个状态
-			break;
-		case CTemperatureing:  //正在转换中 
-			if((micros()-Start_Convert_Time) > Current_delay)
-			{ //延时时间到了吗？
-				MS561101BA_GetTemperature(); //取温度	
-				Now_doing = SCPressure;	
-			}
-			break;
-		case SCPressure: //启动气压转换
-			MS561101BA_startConversion(MS561101BA_D1 + MS5611Press_OSR);
-			Current_delay = MS5611_Delay_us[MS5611Press_OSR];//转换时间
-			Start_Convert_Time = micros();//计时开始
-			Now_doing = SCPressureing;//下一个状态
-			break;
-		case SCPressureing:	 //正在转换气压值
-			if((micros()-Start_Convert_Time) > Current_delay)
-			{ //延时时间到了吗？
-				MS561101BA_getPressure();   //更新 计算	
-				Baro_ALT_Updated = 0xff; 	//高度更新 完成。
-				Now_doing = SCTemperature;  //从头再来
-			}
-			break;
-		default: 
-			Now_doing = SCTemperature;
-			break;
-	}
-}
-
-
-void MS5611_ThreadNew(void) 
-{
-	switch(Now_doing)
-	{ //查询状态 看看我们现在 该做些什么？
- 		case SCTemperature:  //启动温度转换
-			//开启温度转换
-				MS561101BA_startConversion(MS561101BA_D2 + MS5611Temp_OSR);
-				Current_delay = MS5611_Delay_us[MS5611Temp_OSR] ;//转换时间
-				Start_Convert_Time = micros(); //计时开始
-				Now_doing = CTemperatureing;//下一个状态
- 		break;
+	switch(Now_doing) {
+ 	case SCTemperature:
+next_loop:
+		MS561101BA_startConversion(MS561101BA_D2 + MS5611Temp_OSR);
+		Current_delay = MS5611_Delay_us[MS5611Temp_OSR];
+		Start_Convert_Time = micros();
+		Now_doing = CTemperatureing;
+		break;
 		
-		case CTemperatureing:  //正在转换中 
-			if((micros()-Start_Convert_Time) > Current_delay)
-			{ //延时时间到了吗？
-				MS561101BA_GetTemperature(); //取温度	
-				//启动气压转换
-				MS561101BA_startConversion(MS561101BA_D1 + MS5611Press_OSR);
-				Current_delay = MS5611_Delay_us[MS5611Press_OSR];//转换时间
-				Start_Convert_Time = micros();//计时开始
-				Now_doing = SCPressureing;//下一个状态
-			}
-			break;
+	case CTemperatureing:
+		if((micros()-Start_Convert_Time) > Current_delay) {
+			D2 = MS561101BA_GetD();	
+			MS561101BA_startConversion(MS561101BA_D1 + MS5611Press_OSR);
+			Current_delay = MS5611_Delay_us[MS5611Press_OSR];
+			Start_Convert_Time = micros();
+			Now_doing = SCPressureing;
+		}
+		break;
  
-		case SCPressureing:	 //正在转换气压值
-			if((micros()-Start_Convert_Time) > Current_delay)
-			{ //延时时间到了吗？
-				MS561101BA_getPressure();   //更新 计算	
-				Baro_ALT_Updated = 0xff; 	//高度更新 完成。
-			//	Now_doing = SCTemperature;  //从头再来
-				//开启温度转换
-				MS561101BA_startConversion(MS561101BA_D2 + MS5611Temp_OSR);
-				Current_delay = MS5611_Delay_us[MS5611Temp_OSR] ;//转换时间
-				Start_Convert_Time = micros(); //计时开始
-				Now_doing = CTemperatureing;//下一个状态
-			}
-			break;
-		default: 
-			Now_doing = CTemperatureing;
-			break;
+	case SCPressureing:
+		if((micros()-Start_Convert_Time) > Current_delay) {
+			D1 = MS561101BA_GetD();
+			/* D1 & D2 are ready for calculatation. */
+			MS561101BA_Calculate(D1, D2);
+			goto next_loop;
+		}
+		break;
+	default:
+		Now_doing = CTemperatureing;
+		break;
 	}
 }
 //注意，使用前确保
-uint8_t  WaitBaroInitOffset(void)
+uint8_t WaitBaroInitOffset(void)
 {
-	uint32_t startTime=0;
-	uint32_t now=0;
-	
-	startTime=micros();	//us
-  while(!paOffsetInited)
-	{
-			MS5611_ThreadNew();
-			now=micros();
-			if((now-startTime)/1000 >= PA_OFFSET_INIT_NUM * 50)	//超时
-			{
-				return 0;
-			}
+	while(!Alt_offset_Pa) {
+		MS5611_Thread();
+		/* assert error??? */
 	}
-	
 	return 1;
 }
 

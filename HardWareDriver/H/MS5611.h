@@ -39,13 +39,22 @@
 //  Pressure    in 0.01mbar = Pa
 //  Altitude    in meter
 //  VerticalSpeed in m/s
-extern volatile float MS5611_Temperature,MS5611_Pressure,MS5611_Altitude,MS5611_VerticalSpeed;
+extern volatile float MS5611_VerticalSpeed;
 extern uint8_t Baro_ALT_Updated ; //气压计高度更新完成标志。
-extern uint8_t paOffsetInited;
+extern float Alt_offset_Pa;
 void MS5611_Init(void);
 void MS5611_Thread(void);
-void MS5611_ThreadNew(void) ;
 uint8_t  WaitBaroInitOffset(void);
+void MS5611_ReadTemperature(void);
+void MS5611_ReadTemperatureAndPressure(void);
+
+
+#define MS5611_RESULT_TEMP	0
+#define MS5611_RESULT_PRESS	1
+#define MS5611_RESULT_ALT	2
+#define MS5611_RESULT_NUM	3
+
+extern float MS5611_Result[];
 
 #endif
 
