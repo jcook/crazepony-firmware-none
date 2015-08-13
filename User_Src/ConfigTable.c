@@ -2,6 +2,7 @@
 * EEPROM Table by samit
 **/
 
+#include "config.h"
 #include "ConfigTable.h"
 #include "stmflash.h"
 #include "Control.h"
