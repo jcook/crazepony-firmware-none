@@ -123,9 +123,8 @@ void SetHeadFree(uint8_t on)
 //run after get rc cmd
 void CtrlAttiAng(void)
 {
-		static float yawHold=0;
 		static uint32_t tPrev=0;
-		float yawRateTarget=0;
+		//float yawRateTarget=0;
 		float angTarget[3]={0};
 		float dt=0,t=0;
 		t=micros();
@@ -424,7 +423,7 @@ void CtrlAlti(void)
 //描述：输出PWM，控制电机，本函数会被主循环中100Hz循环调用
 void CtrlMotor(void)
 {
-		static float thrAngCorrect;	//对倾斜做修正
+		//static float thrAngCorrect;	//对倾斜做修正
 		float  cosTilt = imu.accb[2] / ONE_G;
 	
 		if(altCtrlMode==MANUAL)

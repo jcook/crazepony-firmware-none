@@ -268,29 +268,29 @@ uint8_t MPU6050_DMP_Initialize(void)
 	int8_t xgOffset	, ygOffset , zgOffset;
 	
     // reset device
-    //printf(("\r\n=======配置DMP引擎=========\r\n"));
-    //printf(("复位MPU6050...\r\n"));
+    //Q_printf(("\r\n=======配置DMP引擎=========\r\n"));
+    //Q_printf(("复位MPU6050...\r\n"));
     MPU6050_reset();
     delay_ms(50); // wait after reset 50ms
-    //printf(("禁止休眠模式...\r\n"));
+    //Q_printf(("禁止休眠模式...\r\n"));
     MPU6050_setSleepEnabled(0);
-    //printf(("\r\n读取MPU6050硬件版本...\r\n"));
-    //printf(("正在选择用户内存块...\r\n"));
+    //Q_printf(("\r\n读取MPU6050硬件版本...\r\n"));
+    //Q_printf(("正在选择用户内存块...\r\n"));
     MPU6050_setMemoryBank(0x10, 1, 1);
-    //printf(("正在选择用户内存字节...\r\n"));
+    //Q_printf(("正在选择用户内存字节...\r\n"));
     MPU6050_setMemoryStartAddress(0x06);
-    //printf(("正在检查硬件版本...\r\n"));
+    //Q_printf(("正在检查硬件版本...\r\n"));
     MPU6050_readMemoryByte();
-    ////printf(("Revision @ user[16][6] = \r\n"));
-    //printf(("复位内存块...\r\n"));
+    ////Q_printf(("Revision @ user[16][6] = \r\n"));
+    //Q_printf(("复位内存块...\r\n"));
     MPU6050_setMemoryBank(0, 0, 0);
     // check OTP bank valid
-    //printf(("读取OTP块有效标志...\r\n"));
+    //Q_printf(("读取OTP块有效标志...\r\n"));
     MPU6050_getOTPBankValid();
-//     //printf("OTP bank is ");
-//     //printf(otpValid ? ("valid!") : ("invalid!"));
+//     //Q_printf("OTP bank is ");
+//     //Q_printf(otpValid ? ("valid!") : ("invalid!"));
     // get X/Y/Z gyro offsets
-    //printf(("读取加速度偏移值...\r\n"));
+    //Q_printf(("读取加速度偏移值...\r\n"));
     xgOffset = MPU6050_getXGyroOffsetTC();
     ygOffset = MPU6050_getYGyroOffsetTC();
     zgOffset = MPU6050_getZGyroOffsetTC(); 
@@ -298,128 +298,128 @@ uint8_t MPU6050_DMP_Initialize(void)
   	
 
 	// setup weird slave stuff (?)
-    //printf(("设置从器件地址为0x7F...\r\n"));
+    //Q_printf(("设置从器件地址为0x7F...\r\n"));
     MPU6050_setSlaveAddress(0, 0x7F);
-    //printf(("禁止IIC主器件模式...\r\n"));
+    //Q_printf(("禁止IIC主器件模式...\r\n"));
     MPU6050_setI2CMasterModeEnabled(0);
     //主控制器的I2C与	MPU6050的AUXI2C	直通。控制器可以直接访问HMC5883L
     MPU6050_setI2CBypassEnabled(1);	     
-    //printf(("设置从器件地址为0x68...\r\n"));
+    //Q_printf(("设置从器件地址为0x68...\r\n"));
     MPU6050_setSlaveAddress(0, 0x68);
-    //printf(("复位IIC主器件控制权...\r\n"));
+    //Q_printf(("复位IIC主器件控制权...\r\n"));
     MPU6050_resetI2CMaster();
     delay_ms(20);
 
     // load DMP code into memory banks
-    //printf(("正在写入DMP代码段到MPU6050 \r\n"));
+    //Q_printf(("正在写入DMP代码段到MPU6050 \r\n"));
     if (MPU6050_writeProgMemoryBlock(dmpMemory, MPU6050_DMP_CODE_SIZE, 0, 0, 1)) {
-        //printf(("DMP代码写入校验成功...\r\n"));
-        //printf(("配置DMP和有关设置...\r\n"));
+        //Q_printf(("DMP代码写入校验成功...\r\n"));
+        //Q_printf(("配置DMP和有关设置...\r\n"));
         // write DMP configuration
-         //printf(("正在写入DMP配置代码到MPU6050内存...\r\n"));
+         //Q_printf(("正在写入DMP配置代码到MPU6050内存...\r\n"));
         if (MPU6050_writeProgDMPConfigurationSet(dmpConfig, MPU6050_DMP_CONFIG_SIZE)) {
-            //printf(("DMP配置代码写入校验成功\r\n"));
-            //printf(("设置Z轴角速度时钟源...\r\n"));
+            //Q_printf(("DMP配置代码写入校验成功\r\n"));
+            //Q_printf(("设置Z轴角速度时钟源...\r\n"));
             MPU6050_setClockSource(MPU6050_CLOCK_PLL_ZGYRO);
-            //printf(("使能DMP引擎和FIFO中断...\r\n"));
+            //Q_printf(("使能DMP引擎和FIFO中断...\r\n"));
             MPU6050_setIntEnabled(0x12);
-            //printf(("设置DMP采样率为200Hz...\r\n"));
+            //Q_printf(("设置DMP采样率为200Hz...\r\n"));
             MPU6050_setRate(4); // 1khz / (1 + 4) = 200 Hz
-            //printf(("设置外部同步帧到TEMP_OUT_L[0]...\r\n"));
+            //Q_printf(("设置外部同步帧到TEMP_OUT_L[0]...\r\n"));
             MPU6050_setExternalFrameSync(MPU6050_EXT_SYNC_TEMP_OUT_L);
-            //printf(("设置DLPF带宽为42Hz...\r\n"));
+            //Q_printf(("设置DLPF带宽为42Hz...\r\n"));
             MPU6050_setDLPFMode(MPU6050_DLPF_BW_42);
-            //printf(("设置角速度精度为 +/- 2000 deg/sec...\r\n"));
+            //Q_printf(("设置角速度精度为 +/- 2000 deg/sec...\r\n"));
             MPU6050_setFullScaleGyroRange(MPU6050_GYRO_FS_2000);
-            //printf(("设置DMP配置字节...\r\n"));
+            //Q_printf(("设置DMP配置字节...\r\n"));
             MPU6050_setDMPConfig1(0x03);
             MPU6050_setDMPConfig2(0x00);
-            //printf(("清楚OTP块标志...\r\n"));
+            //Q_printf(("清楚OTP块标志...\r\n"));
             MPU6050_setOTPBankValid(0);
-            //printf(("设置X/Y/Z轴角速度为先前值...\r\n"));
+            //Q_printf(("设置X/Y/Z轴角速度为先前值...\r\n"));
             MPU6050_setXGyroOffsetTC(xgOffset);
             MPU6050_setYGyroOffsetTC(ygOffset);
             MPU6050_setZGyroOffsetTC(zgOffset);
 						
 				//		DMPCalibrate();		//tobe tested
 						
-            //printf(("写入最后内存跟新到 1/7 ...\r\n"));
+            //Q_printf(("写入最后内存跟新到 1/7 ...\r\n"));
             for (j = 0; j < 4 || j < dmpUpdate[2] + 3; j++, pos++) dmpUpdate[j] = dmpUpdates[pos];
             MPU6050_writeMemoryBlock(dmpUpdate + 3, dmpUpdate[2], dmpUpdate[0], dmpUpdate[1], 1, 0);
-            //printf(("写入最后内存跟新到 2/7 ...\r\n"));
+            //Q_printf(("写入最后内存跟新到 2/7 ...\r\n"));
             for (j = 0; j < 4 || j < dmpUpdate[2] + 3; j++, pos++) dmpUpdate[j] = dmpUpdates[pos];
             MPU6050_writeMemoryBlock(dmpUpdate + 3, dmpUpdate[2], dmpUpdate[0], dmpUpdate[1], 0, 0);
-            //printf(("正在复位FIFO...\r\n"));
+            //Q_printf(("正在复位FIFO...\r\n"));
             MPU6050_resetFIFO();
-            //printf(("正在读取FIFO计数...\r\n"));
+            //Q_printf(("正在读取FIFO计数...\r\n"));
             fifoCount = MPU6050_getFIFOCount();
             MPU6050_getFIFOBytes(fifoBuffer, fifoCount);
-            //printf(("正在设置运动阈值为2...\r\n"));
+            //Q_printf(("正在设置运动阈值为2...\r\n"));
             MPU6050_setMotionDetectionThreshold(2);
-            //printf(("正在设置0运动检测阈值为156...\r\n"));
+            //Q_printf(("正在设置0运动检测阈值为156...\r\n"));
             MPU6050_setZeroMotionDetectionThreshold(156);
-            //printf(("正在设置运动检测持续时间为80...\r\n"));
+            //Q_printf(("正在设置运动检测持续时间为80...\r\n"));
             MPU6050_setMotionDetectionDuration(80);
-            //printf(("正在设置0运动检测持续时间为0...\r\n"));
+            //Q_printf(("正在设置0运动检测持续时间为0...\r\n"));
             MPU6050_setZeroMotionDetectionDuration(0);
-            //printf(("复位FIFO...\r\n"));
+            //Q_printf(("复位FIFO...\r\n"));
             MPU6050_resetFIFO();
-            //printf(("正在使能FIFO...\r\n"));
+            //Q_printf(("正在使能FIFO...\r\n"));
             MPU6050_setFIFOEnabled(1);
-            //printf(("正在使能DMP...\r\n"));
+            //Q_printf(("正在使能DMP...\r\n"));
             MPU6050_setDMPEnabled(1);
-            //printf(("复位DMPDMP...\r\n"));
+            //Q_printf(("复位DMPDMP...\r\n"));
             MPU6050_resetDMP();
-			      //printf(("写入最后内存跟新到 3/7 ......\r\n"));
+			      //Q_printf(("写入最后内存跟新到 3/7 ......\r\n"));
             for (j = 0; j < 4 || j < dmpUpdate[2] + 3; j++, pos++) dmpUpdate[j] = dmpUpdates[pos];
             MPU6050_writeMemoryBlock(dmpUpdate + 3, dmpUpdate[2], dmpUpdate[0], dmpUpdate[1], 0, 0);
-            //printf(("写入最后内存跟新到 4/7 ......\r\n"));
+            //Q_printf(("写入最后内存跟新到 4/7 ......\r\n"));
             for (j = 0; j < 4 || j < dmpUpdate[2] + 3; j++, pos++) dmpUpdate[j] = dmpUpdates[pos];
             MPU6050_writeMemoryBlock(dmpUpdate + 3, dmpUpdate[2], dmpUpdate[0], dmpUpdate[1], 0, 0);
-            //printf(("写入最后内存跟新到 5/7 ......\r\n"));
+            //Q_printf(("写入最后内存跟新到 5/7 ......\r\n"));
             for (j = 0; j < 4 || j < dmpUpdate[2] + 3; j++, pos++) dmpUpdate[j] = dmpUpdates[pos];
             MPU6050_writeMemoryBlock(dmpUpdate + 3, dmpUpdate[2], dmpUpdate[0], dmpUpdate[1], 0, 0);
-            //printf(("等待FIFO计数>=2...\r\n"));
+            //Q_printf(("等待FIFO计数>=2...\r\n"));
             while ((fifoCount = MPU6050_getFIFOCount()) < 3);
-            //printf(("复位 FIFO...\r\n"));
+            //Q_printf(("复位 FIFO...\r\n"));
             MPU6050_getFIFOBytes(fifoBuffer, min(fifoCount, 128)); // safeguard only 128 bytes
-            //printf(("读取中断状态...\r\n"));
+            //Q_printf(("读取中断状态...\r\n"));
             MPU6050_getIntStatus();
-            //printf(("写入最后内存跟新到 6/7 ......\r\n"));
+            //Q_printf(("写入最后内存跟新到 6/7 ......\r\n"));
             for (j = 0; j < 4 || j < dmpUpdate[2] + 3; j++, pos++) dmpUpdate[j] = dmpUpdates[pos];
             MPU6050_readMemoryBlock(dmpUpdate + 3, dmpUpdate[2], dmpUpdate[0], dmpUpdate[1]);
-            //printf(("等待FIFO计数>=2...\r\n"));
+            //Q_printf(("等待FIFO计数>=2...\r\n"));
             while ((fifoCount = MPU6050_getFIFOCount()) < 3);
-            //printf(("正在读取FIFO...\r\n"));
+            //Q_printf(("正在读取FIFO...\r\n"));
             MPU6050_getFIFOBytes(fifoBuffer, min(fifoCount, 128)); // safeguard only 128 bytes
-            //printf(("正在读取中断状态...\r\n"));
+            //Q_printf(("正在读取中断状态...\r\n"));
             MPU6050_getIntStatus();
-            //printf(("写入最后内存跟新到 7/7 ......\r\n"));
+            //Q_printf(("写入最后内存跟新到 7/7 ......\r\n"));
             for (j = 0; j < 4 || j < dmpUpdate[2] + 3; j++, pos++) dmpUpdate[j] = dmpUpdates[pos];
             MPU6050_writeMemoryBlock(dmpUpdate + 3, dmpUpdate[2], dmpUpdate[0], dmpUpdate[1], 0, 0);
-            //printf(("DMP设置一切正常...\r\n"));
+            //Q_printf(("DMP设置一切正常...\r\n"));
 
-            //printf(("关闭DMP引擎...\r\n"));
+            //Q_printf(("关闭DMP引擎...\r\n"));
             MPU6050_setDMPEnabled(0);
-            //printf(("设置内部42字节缓冲包...\r\n"));
+            //Q_printf(("设置内部42字节缓冲包...\r\n"));
             dmpPacketSize = 42;	 
-            //printf(("最后一次复位FIFO和中断状态...\r\n"));
+            //Q_printf(("最后一次复位FIFO和中断状态...\r\n"));
             MPU6050_resetFIFO();
             MPU6050_getIntStatus();
-            //printf(("打开DMP引擎...\r\n"));
+            //Q_printf(("打开DMP引擎...\r\n"));
 			      MPU6050_setDMPEnabled(1);
-			      //printf(("DMP引擎准备就绪,等待第一次数据中断...\r\n"));
+			      //Q_printf(("DMP引擎准备就绪,等待第一次数据中断...\r\n"));
 			      MPU6050_getIntStatus();
 
         } else {
-            //printf(("DMP引擎配置校验出错...\r\n"));
+            //Q_printf(("DMP引擎配置校验出错...\r\n"));
             return 2; // configuration block loading failed
         }
     } else {
-         //printf(("DMP代码校验出错.\r\n"));
+         //Q_printf(("DMP代码校验出错.\r\n"));
         return 1; // main binary block loading failed
     }
-    //printf(("======DMP引擎初始化完成========\r\n"));
+    //Q_printf(("======DMP引擎初始化完成========\r\n"));
     return 0; // success
 }
 

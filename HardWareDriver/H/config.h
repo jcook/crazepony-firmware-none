@@ -1,6 +1,7 @@
 #ifndef __config_H
 #define __config_H
 
+#include "SysConfig.h"
 
 #include "stm32f10x.h"
 #include "stm32f10x_it.h"

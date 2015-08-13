@@ -20,6 +20,7 @@ UART1.c file
 3.提供标准输入输出printf()的底层驱动，也就是说printf可以直接调用
 ------------------------------------
 */
+#include "config.h"
 #include "UART1.h"
 #include "stdio.h"
 #include "extern_variable.h"
@@ -45,7 +46,7 @@ struct __FILE
 { 
 	int handle; 
 	/* Whatever you require here. If the only file you are using is */ 
-	/* standard output using printf() for debugging, no file handling */ 
+	/* standard output using Q_printf() for debugging, no file handling */ 
 	/* is required. */ 
 }; 
 /* FILE is typedef’ d in stdio.h. */ 
@@ -128,8 +129,8 @@ void UART1_init(u32 pclk2,u32 bound)
   UartRxbuf.pbuf = &rx_buffer[0];
   
   
-  printf("MCU clock frequency:%dMHz \r\n",pclk2);
-  printf("UART 1 baud frequncy:%d \r\n",bound);
+  Q_printf("MCU clock frequency:%dMHz \r\n",pclk2);
+  Q_printf("UART 1 baud frequncy:%d \r\n",bound);
  
   
 }
@@ -211,7 +212,7 @@ volatile uint8_t Udatatmp;//串口接收临时数据字节
 //------------------------------------------------------
 void USART1_IRQHandler(void)
 {
-  uint8_t i;
+//  uint8_t i;
 	
   if(USART_GetITStatus(USART1, USART_IT_TXE) != RESET)
   {   

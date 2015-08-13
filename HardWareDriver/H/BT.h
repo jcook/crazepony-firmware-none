@@ -12,8 +12,8 @@
 //AT 字符串
 #define BT_BAUD_AT		 "OK+NAME:" BT_NAME
 
-#define BT_on()      {GPIO_SetBits(GPIOB, GPIO_Pin_2);printf("BT power init success...\r\n");}
-#define BT_off()     {GPIO_ResetBits(GPIOB, GPIO_Pin_2);printf("BT power close success...\r\n");}//宏定义蓝牙开关
+#define BT_on()      {GPIO_SetBits(GPIOB, GPIO_Pin_2);Q_printf("BT power init success...\r\n");}
+#define BT_off()     {GPIO_ResetBits(GPIOB, GPIO_Pin_2);Q_printf("BT power close success...\r\n");}//宏定义蓝牙开关
 
 #define CmdreturnLength 20
 

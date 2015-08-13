@@ -22,6 +22,11 @@ extern uint8_t btSrc;
 //	;
 //}SystemConfig_t;
 
+#ifdef UART_DEBUG
+#define Q_printf(msg...)	printf(msg)
+#else
+#define	Q_printf(msg...)
+#endif
 
 #endif
 

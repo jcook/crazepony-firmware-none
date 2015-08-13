@@ -121,7 +121,7 @@ void PowerOn()
     LedA_off;LedB_off;LedC_off;LedD_off;
     Delay(900000);
     }
-    printf("Armed success...\r\n");
+    Q_printf("Armed success...\r\n");
 }
 
 

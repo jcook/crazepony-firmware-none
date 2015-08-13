@@ -26,8 +26,8 @@
 #include "config.h"
 #include "stm32f10x_it.h"
 
-static u8  fac_us=0;//us延时倍乘数
-static u16 fac_ms=0;//ms延时倍乘数
+//static u8  fac_us=0;//us延时倍乘数
+//static u16 fac_ms=0;//ms延时倍乘数
 
 //初始化延迟函数
 //SYSTICK的时钟固定为HCLK时钟的1/8
@@ -43,9 +43,9 @@ static u16 fac_ms=0;//ms延时倍乘数
 void delay_init(u8 SYSCLK)
 {
 	SysTick->CTRL&=0xfffffffb;//bit2清空,选择外部时钟  HCLK/8
-	fac_us=SYSCLK/8;		    
-	fac_ms=(u16)fac_us*1000;
-  printf("Delay function init success...\r\n");
+	//fac_us=SYSCLK/8;		    
+	//fac_ms=(u16)fac_us*1000;
+  Q_printf("Delay function init success...\r\n");
 }				
 				    
 //延时nms

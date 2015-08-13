@@ -20,6 +20,7 @@ Battery.c file
 ------------------------------------
 */
 
+#include "config.h"
 #include "Battery.h"
 #include "UART1.h"
 #include "stdio.h"
@@ -87,7 +88,7 @@ void BatteryCheckInit()
   
   
   
-  printf("Batter voltage AD init ...\r\n");
+  Q_printf("Batter voltage AD init ...\r\n");
   
 }
 

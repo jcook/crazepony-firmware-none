@@ -19,6 +19,7 @@ moto.c file
 2.用定时器2的PWM输出模式
 ------------------------------------
 */
+#include "config.h"
 #include "stm32f10x.h"
 #include "moto.h"
 #include "UART1.h"
@@ -112,5 +113,5 @@ void MotorInit(void)
     
     // 启动计时器。
     TIM_Cmd(TIM2,ENABLE);
-    printf("Motor init success...\r\n");
+    Q_printf("Motor init success...\r\n");
 }

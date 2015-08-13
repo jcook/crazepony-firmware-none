@@ -23,7 +23,7 @@ iic.c file
 //细节有空再改
 //最后修改:2014-03-11
 
-
+#include "config.h"
 #include "IIC.h"
 #include "delay.h"
 #include "Led.h"
@@ -43,7 +43,7 @@ void IIC_Init(void)
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
   //应用配置到GPIOB 
   GPIO_Init(GPIOB, &GPIO_InitStructure);
-  printf("IIC bus init success...\r\n");
+  Q_printf("IIC bus init success...\r\n");
 }
 
 /**************************实现函数********************************************

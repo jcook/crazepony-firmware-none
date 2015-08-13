@@ -307,7 +307,7 @@ void ReturnPIDHead(uint8_t pidType)
 void DebugUploadHandle(void)
 {
  
-uint8_t i=0;//,sum=0;
+//uint8_t i=0;//,sum=0;
 
 	up.roll.val= imu.roll * 100;
 	up.pitch.val= imu.pitch * 100;
@@ -341,7 +341,7 @@ static void EndianConvert(uint8_t arr[], uint8_t len)
 
 static void DebugUploadHandle2()
 {
-	uint8_t i;
+//	uint8_t i;
 		
 		checksum=0;
 //		UartBufClear(&UartTxbuf);

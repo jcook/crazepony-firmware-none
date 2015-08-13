@@ -20,7 +20,7 @@ BT.c file
 ------------------------------------
 */
 
-
+#include "config.h"
 #include "BT.h"
 #include "delay.h"
 #include "UART1.h"
@@ -154,7 +154,7 @@ void BT_ATcmdWrite(void)
 		return ;
 	}
 	
-	printf("BT baund check and init begin.printf is useless.\r\n\r\n");
+	Q_printf("BT baund check and init begin.Q_printf is useless.\r\n\r\n");
 		
 	BT_CurBaud = BT_Scan_Buad();
 	
@@ -184,13 +184,13 @@ void BT_ATcmdWrite(void)
 		}
 	}else{
 		//已经是115200，可以直接通信
-		printf("BT module baud is 115200 okay\r\n");
+		Q_printf("BT module baud is 115200 okay\r\n");
 	}
 			
 	//最终STM32的UART波特率设置回115200
 	UART1_init(SysClock,BT_BAUD_Set);
 	
-	printf("\r\nBT baund check and init end.\r\n");
+	Q_printf("\r\nBT baund check and init end.\r\n");
 	
 }
 

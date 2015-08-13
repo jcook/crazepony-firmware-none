@@ -19,6 +19,7 @@ moto.c file
 2.具体操作细节还有些BUG，有些地址读出来的数据有问题，我暂时没找到原因，望各路热血青年一起来解决
 ------------------------------------
 */
+#include "config.h"
 #include "stmflash.h"
 #include "delay.h"
 #include "UART1.h"
@@ -34,7 +35,7 @@ void STMFLASH_Unlock(void)
 {
   FLASH->KEYR=FLASH_KEY1;//写入解锁序列.
   FLASH->KEYR=FLASH_KEY2;
-  printf("Inner FLASH unlock success...\r\n");
+  Q_printf("Inner FLASH unlock success...\r\n");
 }
 //flash上锁
 void STMFLASH_Lock(void)

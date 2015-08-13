@@ -19,6 +19,7 @@ moto.c file
 2.供NRF24L01接口
 ------------------------------------
 */
+#include "config.h"
 #include "spi.h"
 #include "UART1.h"
 #include "stdio.h"
@@ -66,7 +67,7 @@ void SPI1_INIT(void)
     SPI_Init(SPI1, &SPI_InitStructure); 
     /* Enable SPI1 */ 
     SPI_Cmd(SPI1, ENABLE);
-    printf("SPI bus init success...\r\n");
+    Q_printf("SPI bus init success...\r\n");
 }
 
 

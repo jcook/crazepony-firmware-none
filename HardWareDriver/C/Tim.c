@@ -82,37 +82,37 @@ void TIM3_IRQHandler(void)		//打印中断服务程序
       if( DebugCounter==500)
             {
             DebugCounter=0;
-            printf(" ******************************************************************\r\n");
-            printf(" *       ____                      _____                  +---+   *\r\n");
-            printf(" *      / ___\\                     / __ \\                 | R |   *\r\n");
-            printf(" *     / /                        / /_/ /                 +---+   *\r\n");
-            printf(" *    / /   ________  ____  ___  / ____/___  ____  __   __        *\r\n");
-            printf(" *   / /  / ___/ __ `/_  / / _ \\/ /   / __ \\/ _  \\/ /  / /        *\r\n");
-            printf(" *  / /__/ /  / /_/ / / /_/  __/ /   / /_/ / / / / /__/ /         *\r\n");
-            printf(" *  \\___/_/   \\__,_/ /___/\\___/_/    \\___ /_/ /_/____  /          *\r\n");
-            printf(" *                                                  / /           *\r\n");
-            printf(" *                                             ____/ /            *\r\n");
-            printf(" *                                            /_____/             *\r\n");
-            printf(" ******************************************************************\r\n");
-            printf("\r\n");
-            printf("\r\n");
-            printf(" Yaw ---> %5.2f degree\r\n",(float)imu.yaw);
-            printf(" Pitch---> %5.2f degree\r\n",(float)imu.pitch);
-            printf(" Roll ---> %5.2f degree\r\n",(float)imu.roll);
-            printf("====================================\r\n");
-            printf(" Motor M1 PWM---> %d\r\n",TIM2->CCR1);
-            printf(" Motor M2 PWM---> %d\r\n",TIM2->CCR2);
-            printf(" Motor M3 PWM---> %d\r\n",TIM2->CCR3);
-            printf(" Motor M4 PWM---> %d\r\n",TIM2->CCR4);
-            printf("====================================\r\n");
-						printf(" Pressure ---> %5.2f Pa\r\n",(float)MS5611_Pressure);
-            printf(" Altitude ---> %5.2f M\r\n",(float)MS5611_Altitude);
-            printf(" Temperature---> %5.2f C\r\n",(float)MS5611_Temperature);
-						printf("====================================\r\n");
+            Q_printf(" ******************************************************************\r\n");
+            Q_printf(" *       ____                      _____                  +---+   *\r\n");
+            Q_printf(" *      / ___\\                     / __ \\                 | R |   *\r\n");
+            Q_printf(" *     / /                        / /_/ /                 +---+   *\r\n");
+            Q_printf(" *    / /   ________  ____  ___  / ____/___  ____  __   __        *\r\n");
+            Q_printf(" *   / /  / ___/ __ `/_  / / _ \\/ /   / __ \\/ _  \\/ /  / /        *\r\n");
+            Q_printf(" *  / /__/ /  / /_/ / / /_/  __/ /   / /_/ / / / / /__/ /         *\r\n");
+            Q_printf(" *  \\___/_/   \\__,_/ /___/\\___/_/    \\___ /_/ /_/____  /          *\r\n");
+            Q_printf(" *                                                  / /           *\r\n");
+            Q_printf(" *                                             ____/ /            *\r\n");
+            Q_printf(" *                                            /_____/             *\r\n");
+            Q_printf(" ******************************************************************\r\n");
+            Q_printf("\r\n");
+            Q_printf("\r\n");
+            Q_printf(" Yaw ---> %5.2f degree\r\n",(float)imu.yaw);
+            Q_printf(" Pitch---> %5.2f degree\r\n",(float)imu.pitch);
+            Q_printf(" Roll ---> %5.2f degree\r\n",(float)imu.roll);
+            Q_printf("====================================\r\n");
+            Q_printf(" Motor M1 PWM---> %d\r\n",TIM2->CCR1);
+            Q_printf(" Motor M2 PWM---> %d\r\n",TIM2->CCR2);
+            Q_printf(" Motor M3 PWM---> %d\r\n",TIM2->CCR3);
+            Q_printf(" Motor M4 PWM---> %d\r\n",TIM2->CCR4);
+            Q_printf("====================================\r\n");
+						Q_printf(" Pressure ---> %5.2f Pa\r\n",(float)MS5611_Pressure);
+            Q_printf(" Altitude ---> %5.2f M\r\n",(float)MS5611_Altitude);
+            Q_printf(" Temperature---> %5.2f C\r\n",(float)MS5611_Temperature);
+						Q_printf("====================================\r\n");
 						//根据采集到的AD值，计算实际电压。硬件上是对电池进行分压后给AD采集的，所以结果要乘以2
-            printf(" Battery Voltage---> %3.2fv\r\n",Battery.BatteryVal);
-						printf(" RX Addr ---> 0x%x\r\n",RX_ADDRESS[4]);
-            printf("====================================\r\n");
+            Q_printf(" Battery Voltage---> %3.2fv\r\n",Battery.BatteryVal);
+						Q_printf(" RX Addr ---> 0x%x\r\n",RX_ADDRESS[4]);
+            Q_printf("====================================\r\n");
         }
         TIM_ClearITPendingBit(TIM3 , TIM_FLAG_Update);   //清除中断标志   
     }
@@ -139,7 +139,7 @@ void TIM4_Init(char clock,int Preiod)
 
     TIM_ITConfig(TIM4,TIM_IT_Update,ENABLE);
     TIM_Cmd(TIM4,ENABLE);
-    printf("Timer 4 init success...\r\n");
+    Q_printf("Timer 4 init success...\r\n");
     
 }	
 
@@ -164,7 +164,7 @@ void TIM3_Init(char clock,int Preiod)
     TIM_ITConfig(TIM3,TIM_IT_Update,ENABLE);
     TIM_Cmd(TIM3,ENABLE);
   
-    printf("Timer 3 init success...\r\n");
+    Q_printf("Timer 3 init success...\r\n");
 }		
 
 

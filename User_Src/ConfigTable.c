@@ -85,7 +85,7 @@ void TableToParam(void)
 		for(i=0;i<5;i++){
 			((u8 *)(&RX_ADDRESS))[i] = ((float *)(&table.NRFaddr))[i];
 			
-			printf("RX_ADDRESS[%d]:0x%x\r\n",i,RX_ADDRESS[i]);
+			Q_printf("RX_ADDRESS[%d]:0x%x\r\n",i,RX_ADDRESS[i]);
 		}
 		
 	  BTstate = table.BTstate;
@@ -140,7 +140,7 @@ void LoadParamsFromEEPROM(void)
 	}
 	else
 	{
-			printf("load params from eeprom failed,set default value\r\n");
+			Q_printf("load params from eeprom failed,set default value\r\n");
 		
 			ParamSetDefault();//版本检测不对，各项参数设为默认值
 			ParamToTable();
