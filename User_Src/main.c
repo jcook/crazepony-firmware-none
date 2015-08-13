@@ -84,14 +84,6 @@ int main(void)
 
 	IMU_Init();			// sample rate and cutoff freq.  sample rate is too low now due to using dmp.
 
-#ifdef TESTING
-	printf("Testing...\r\n");
-	while (1) {
-		MS5611_ReadTemperatureAndPressure();
-	}
-#endif
-	
-	
 #ifdef UART_DEBUG
 	//定时器3初始化，串口调试信息输出
 	TIM3_Init(SysClock,2000);
@@ -150,7 +142,7 @@ int main(void)
 				accUpdated=1;
 			
 				//气压读取
-				MS5611_Thread();		//FSM, take aboue 0.5ms some time
+				MS5611_ThreadNew();		//FSM, take aboue 0.5ms some time
 
 				//imu校准
 				if(imuCaliFlag)

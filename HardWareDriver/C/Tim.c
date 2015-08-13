@@ -79,10 +79,23 @@ void TIM3_IRQHandler(void)		//打印中断服务程序
 			Battery.BatteryAD  = GetBatteryAD();            //电池电压检测  
 			Battery.BatteryVal = Battery.Bat_K * (Battery.BatteryAD/4096.0) * Battery.ADRef;//实际电压 值计算
       DebugCounter++;
-      if( DebugCounter==5000)
+      if( DebugCounter==500)
             {
             DebugCounter=0;
-#ifndef TESTING
+            printf(" ******************************************************************\r\n");
+            printf(" *       ____                      _____                  +---+   *\r\n");
+            printf(" *      / ___\\                     / __ \\                 | R |   *\r\n");
+            printf(" *     / /                        / /_/ /                 +---+   *\r\n");
+            printf(" *    / /   ________  ____  ___  / ____/___  ____  __   __        *\r\n");
+            printf(" *   / /  / ___/ __ `/_  / / _ \\/ /   / __ \\/ _  \\/ /  / /        *\r\n");
+            printf(" *  / /__/ /  / /_/ / / /_/  __/ /   / /_/ / / / / /__/ /         *\r\n");
+            printf(" *  \\___/_/   \\__,_/ /___/\\___/_/    \\___ /_/ /_/____  /          *\r\n");
+            printf(" *                                                  / /           *\r\n");
+            printf(" *                                             ____/ /            *\r\n");
+            printf(" *                                            /_____/             *\r\n");
+            printf(" ******************************************************************\r\n");
+            printf("\r\n");
+            printf("\r\n");
             printf(" Yaw ---> %5.2f degree\r\n",(float)imu.yaw);
             printf(" Pitch---> %5.2f degree\r\n",(float)imu.pitch);
             printf(" Roll ---> %5.2f degree\r\n",(float)imu.roll);
@@ -91,16 +104,14 @@ void TIM3_IRQHandler(void)		//打印中断服务程序
             printf(" Motor M2 PWM---> %d\r\n",TIM2->CCR2);
             printf(" Motor M3 PWM---> %d\r\n",TIM2->CCR3);
             printf(" Motor M4 PWM---> %d\r\n",TIM2->CCR4);
-#endif
-	    printf("====================================\r\n");
-
-	    printf(" Pressure ---> %5.2f Pa\r\n",(float)MS5611_Result[MS5611_RESULT_PRESS]);
-            printf(" Altitude ---> %5.2f M\r\n",(float)MS5611_Result[MS5611_RESULT_ALT]);
-            printf(" Temperature---> %5.2f C\r\n",(float)MS5611_Result[MS5611_RESULT_TEMP]);
-	    //printf("====================================\r\n");
-	    //根据采集到的AD值，计算实际电压。硬件上是对电池进行分压后给AD采集的，所以结果要乘以2
+            printf("====================================\r\n");
+						printf(" Pressure ---> %5.2f Pa\r\n",(float)MS5611_Pressure);
+            printf(" Altitude ---> %5.2f M\r\n",(float)MS5611_Altitude);
+            printf(" Temperature---> %5.2f C\r\n",(float)MS5611_Temperature);
+						printf("====================================\r\n");
+						//根据采集到的AD值，计算实际电压。硬件上是对电池进行分压后给AD采集的，所以结果要乘以2
             printf(" Battery Voltage---> %3.2fv\r\n",Battery.BatteryVal);
-	    //printf(" RX Addr ---> 0x%x\r\n",RX_ADDRESS[4]);
+						printf(" RX Addr ---> 0x%x\r\n",RX_ADDRESS[4]);
             printf("====================================\r\n");
         }
         TIM_ClearITPendingBit(TIM3 , TIM_FLAG_Update);   //清除中断标志   

@@ -79,7 +79,7 @@ void AltitudeCombineThread(void)
   dt = (tPre>0)?((t-tPre)/1000000.0f):0;
 	tPre=t;
 	
-		if(!Alt_offset_Pa)	//wait baro to init its offset
+		if(!paOffsetInited)	//wait baro to init its offset
 			return;
 		
 		if(!imu.ready)
@@ -88,7 +88,7 @@ void AltitudeCombineThread(void)
 	//store err when sensor update 
 	if(Baro_ALT_Updated)	//后面应该在sensor数值后加一个timeStamp，判断是否更新
 	{
-			corr_baro = 0 - MS5611_Result[MS5611_RESULT_ALT] - z_est[0];		// MS5611_Altitude baro alt, is postive above offset level. not in NED. z_est is in NED frame. 
+			corr_baro = 0 - MS5611_Altitude - z_est[0];		// MS5611_Altitude baro alt, is postive above offset level. not in NED. z_est is in NED frame. 
 			Baro_ALT_Updated=0;
 	}
  
