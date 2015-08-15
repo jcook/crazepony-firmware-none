@@ -59,20 +59,12 @@ void BatteryCheckInit()
 	ADC1->CR2|=1<<20;      //使用用外部触发(SWSTART)!!!	必须使用一个事件来触发
 	ADC1->CR2&=~(1<<11);   //右对齐
 	ADC1->CR2|=1<<23;      //使能温度传感器
-#if 0
 	ADC1->SQR1&=~(0XF<<20);
 	ADC1->SQR1&=0<<20;     //1个转换在规则序列中 也就是只转换规则序列1
-#endif
 
-#if 0
-	//设置通道1的采样时间
-	ADC1->SMPR2&=~(7<<3);  //通道1采样时间清空
-	ADC1->SMPR2|=7<<3;     //通道1  239.5周期,提高采样时间可以提高精确度
-#else
 	//CHANNEL 8: BAT_DETAC Pin 设置通道 8 的采样时间
-	ADC1->SMPR2 &= ~(7 << 23);  //通道1采样时间清空
-	ADC1->SMPR2 |= 7 << 23;     //通道1  239.5周期,提高采样时间可以提高精确度
-#endif
+	ADC1->SMPR2 &= ~(7 << 23);  //通道8采样时间清空
+	ADC1->SMPR2 |= 7 << 23;     //通道8 239.5周期,提高采样时间可以提高精确度
 
 	/* CHANNEL 16: internal temperature sensor channel. */
 	ADC1->SMPR1&=~(7<<18);  //清除通道16原来的设置
