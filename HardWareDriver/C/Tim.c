@@ -76,8 +76,6 @@ void TIM3_IRQHandler(void)		//打印中断服务程序
 {	
     if( TIM_GetITStatus(TIM3 , TIM_IT_Update) != RESET ) 
     {     
-			Battery.BatteryAD  = GetBatteryAD();            //电池电压检测  
-			Battery.BatteryVal = Battery.Bat_K * (Battery.BatteryAD/4096.0) * Battery.ADRef;//实际电压 值计算
       DebugCounter++;
       if( DebugCounter==500)
             {
