@@ -8,10 +8,10 @@ void AutoLand(void);
 void FailSafeCrash(void);
 
 void FailSafeLostRC(void);
- 
+
 void FailSafeLEDAlarm(void);
 
 void FlightModeFSMSimple(void);
- 
+
 #endif
 

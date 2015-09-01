@@ -89,27 +89,27 @@ uint8_t newTemperatureReading = false;
 
 void readTemperatureRequestPressure(void)
 {
-    uint8_t data[3];
+	uint8_t data[3];
 
-    IICreadBytes( ms5611Address, 0x00, 3, data);    // Request temperature read
+	IICreadBytes( ms5611Address, 0x00, 3, data);    // Request temperature read
 
-    d2.bytes[2] = data[0];
-    d2.bytes[1] = data[1];
-    d2.bytes[0] = data[2];
-	
-		DBG_PRINT("d2: 0x%2x%2x%2x\n",d2.bytes[0],d2.bytes[1],d2.bytes[2]);
+	d2.bytes[2] = data[0];
+	d2.bytes[1] = data[1];
+	d2.bytes[0] = data[2];
 
-    #if   (OSR ==  256)
-				IICwriteOneByte( ms5611Address, 0x40);  // Request pressure conversion
-		#elif (OSR ==  512)
-				IICwriteOneByte( ms5611Address, 0x42);
-		#elif (OSR == 1024)
-				IICwriteOneByte( ms5611Address, 0x44);
-		#elif (OSR == 2048)
-				IICwriteOneByte( ms5611Address, 0x46);
-		#elif (OSR == 4096)
-				IICwriteOneByte( ms5611Address, 0x48);
-    #endif
+	DBG_PRINT("d2: 0x%2x%2x%2x\n",d2.bytes[0],d2.bytes[1],d2.bytes[2]);
+
+#if   (OSR ==  256)
+	IICwriteOneByte( ms5611Address, 0x40);  // Request pressure conversion
+#elif (OSR ==  512)
+	IICwriteOneByte( ms5611Address, 0x42);
+#elif (OSR == 1024)
+	IICwriteOneByte( ms5611Address, 0x44);
+#elif (OSR == 2048)
+	IICwriteOneByte( ms5611Address, 0x46);
+#elif (OSR == 4096)
+	IICwriteOneByte( ms5611Address, 0x48);
+#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -118,27 +118,27 @@ void readTemperatureRequestPressure(void)
 
 void readPressureRequestPressure(void)
 {
-    uint8_t data[3];
+	uint8_t data[3];
 
-    IICreadBytes( ms5611Address, 0x00, 3, data);    // Request pressure read
+	IICreadBytes( ms5611Address, 0x00, 3, data);    // Request pressure read
 
-    d1.bytes[2] = data[0];
-    d1.bytes[1] = data[1];
-    d1.bytes[0] = data[2];
-	
-		DBG_PRINT("d1: 0x%2x%2x%2x\n",d1.bytes[0],d1.bytes[1],d1.bytes[2]);
+	d1.bytes[2] = data[0];
+	d1.bytes[1] = data[1];
+	d1.bytes[0] = data[2];
 
-    #if(OSR ==  256)
-				IICwriteOneByte( ms5611Address, 0x40);  // Request pressure conversion
-		#elif (OSR ==  512)
-			IICwriteOneByte( ms5611Address, 0x42);
-		#elif (OSR == 1024)
-				IICwriteOneByte( ms5611Address, 0x44);
-		#elif (OSR == 2048)
-				IICwriteOneByte( ms5611Address, 0x46);
-		#elif (OSR == 4096)
-				IICwriteOneByte( ms5611Address, 0x48);
-    #endif
+	DBG_PRINT("d1: 0x%2x%2x%2x\n",d1.bytes[0],d1.bytes[1],d1.bytes[2]);
+
+#if(OSR ==  256)
+	IICwriteOneByte( ms5611Address, 0x40);  // Request pressure conversion
+#elif (OSR ==  512)
+	IICwriteOneByte( ms5611Address, 0x42);
+#elif (OSR == 1024)
+	IICwriteOneByte( ms5611Address, 0x44);
+#elif (OSR == 2048)
+	IICwriteOneByte( ms5611Address, 0x46);
+#elif (OSR == 4096)
+	IICwriteOneByte( ms5611Address, 0x48);
+#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -147,27 +147,27 @@ void readPressureRequestPressure(void)
 
 void readPressureRequestTemperature(void)
 {
-    uint8_t data[3];
+	uint8_t data[3];
 
-    IICreadBytes( ms5611Address, 0x00, 3, data);    // Request pressure read
+	IICreadBytes( ms5611Address, 0x00, 3, data);    // Request pressure read
 
-    d1.bytes[2] = data[0];
-    d1.bytes[1] = data[1];
-    d1.bytes[0] = data[2];
-	
-		DBG_PRINT("d1: 0x%2x%2x%2x\n",d1.bytes[0],d1.bytes[1],d1.bytes[2]);
+	d1.bytes[2] = data[0];
+	d1.bytes[1] = data[1];
+	d1.bytes[0] = data[2];
 
-    #if   (OSR ==  256)
-	    IICwriteOneByte( ms5611Address, 0x50);   // Request temperature converison
-	#elif (OSR ==  512)
-	    IICwriteOneByte( ms5611Address, 0x52);
-	#elif (OSR == 1024)
-	    IICwriteOneByte( ms5611Address, 0x54);
-	#elif (OSR == 2048)
-	    IICwriteOneByte( ms5611Address, 0x56);
-	#elif (OSR == 4096)
-	    IICwriteOneByte( ms5611Address, 0x58);
-    #endif
+	DBG_PRINT("d1: 0x%2x%2x%2x\n",d1.bytes[0],d1.bytes[1],d1.bytes[2]);
+
+#if   (OSR ==  256)
+	IICwriteOneByte( ms5611Address, 0x50);   // Request temperature converison
+#elif (OSR ==  512)
+	IICwriteOneByte( ms5611Address, 0x52);
+#elif (OSR == 1024)
+	IICwriteOneByte( ms5611Address, 0x54);
+#elif (OSR == 2048)
+	IICwriteOneByte( ms5611Address, 0x56);
+#elif (OSR == 4096)
+	IICwriteOneByte( ms5611Address, 0x58);
+#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -176,10 +176,10 @@ void readPressureRequestTemperature(void)
 
 void calculateTemperature(void)
 {
-    dT                = (int32_t)d2Value - ((int32_t)c5.value << 8);
-    ms5611Temperature = 2000 + (int32_t)(((int64_t)dT * c6.value) >> 23);
-	
-		DBG_PRINT("TEMP: %d",ms5611Temperature);
+	dT                = (int32_t)d2Value - ((int32_t)c5.value << 8);
+	ms5611Temperature = 2000 + (int32_t)(((int64_t)dT * c6.value) >> 23);
+
+	DBG_PRINT("TEMP: %d",ms5611Temperature);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -205,16 +205,14 @@ void calculatePressureAltitude(void)
 	offset      = ((int64_t)c2.value << 16) + (((int64_t)c4.value * dT) >> 7);
 	sensitivity = ((int64_t)c1.value << 15) + (((int64_t)c3.value * dT) >> 8);
 
-	if (ms5611Temperature < 2000)
-	{
+	if (ms5611Temperature < 2000) {
 		ms5611Temp2  = SQR(dT) >> 31;
 
 		f	 		 = SQR(ms5611Temperature - 2000);
 		offset2      = 5 * f >> 1;
 		sensitivity2 = 5 * f >> 2;
 
-		if (ms5611Temperature < -1500)
-		{
+		if (ms5611Temperature < -1500) {
 			f 			  = SQR(ms5611Temperature + 1500);
 			offset2      +=  7 * f;
 			sensitivity2 += 11 * f >> 1;
@@ -227,7 +225,7 @@ void calculatePressureAltitude(void)
 	}
 
 	p = (((d1Value * sensitivity) >> 21) - offset) >> 15;
-	
+
 	DBG_PRINT("PRESS : %d",p);
 
 	pressureAlt50Hz = 44330.0f * (1.0f - pow((float)p / 101325.0f, 1.0f / 5.255f));
@@ -241,77 +239,77 @@ void calculatePressureAltitude(void)
 
 void initPressure(void)
 {
-	
-    uint8_t data[2];
 
-    ms5611I2C = I2C1;
-    ms5611Address = 0xEE;	 //0XEE为MS5611的八位地址，0X77为MS5611的七位地址，IIC读写函数输入参数为八位地址
+	uint8_t data[2];
 
-		DBG_PRINT("init pressure MS5611\n");
-	
-    IICwriteOneByte( ms5611Address, 0x1E);      // Reset Device
+	ms5611I2C = I2C1;
+	ms5611Address = 0xEE;	 //0XEE为MS5611的八位地址，0X77为MS5611的七位地址，IIC读写函数输入参数为八位地址
 
-    delay_ms(10);
+	DBG_PRINT("init pressure MS5611\n");
 
-    IICreadBytes( ms5611Address, 0xA2, 2, data);    // Read Calibration Data C1
-    c1.bytes[1] = data[0];
-    c1.bytes[0] = data[1];
+	IICwriteOneByte( ms5611Address, 0x1E);      // Reset Device
 
-    IICreadBytes( ms5611Address, 0xA4, 2, data);    // Read Calibration Data C2
-    c2.bytes[1] = data[0];
-    c2.bytes[0] = data[1];
+	delay_ms(10);
 
-    IICreadBytes( ms5611Address, 0xA6, 2, data);    // Read Calibration Data C3
-		c3.bytes[1] = data[0];
-    c3.bytes[0] = data[1];
+	IICreadBytes( ms5611Address, 0xA2, 2, data);    // Read Calibration Data C1
+	c1.bytes[1] = data[0];
+	c1.bytes[0] = data[1];
 
-    IICreadBytes( ms5611Address, 0xA8, 2, data);    // Read Calibration Data C4
-		c4.bytes[1] = data[0];
-    c4.bytes[0] = data[1];
+	IICreadBytes( ms5611Address, 0xA4, 2, data);    // Read Calibration Data C2
+	c2.bytes[1] = data[0];
+	c2.bytes[0] = data[1];
 
-    IICreadBytes( ms5611Address, 0xAA, 2, data);    // Read Calibration Data C5
-		c5.bytes[1] = data[0];
-    c5.bytes[0] = data[1];
+	IICreadBytes( ms5611Address, 0xA6, 2, data);    // Read Calibration Data C3
+	c3.bytes[1] = data[0];
+	c3.bytes[0] = data[1];
 
-    IICreadBytes( ms5611Address, 0xAC, 2, data);    // Read Calibration Data C6
-		c6.bytes[1] = data[0];
-    c6.bytes[0] = data[1];
-		
-		DBG_PRINT("c1:0x%2x%2x\n",c1.bytes[0],c1.bytes[1]);
-		DBG_PRINT("c2:0x%2x%2x\n",c2.bytes[0],c2.bytes[1]);
-		DBG_PRINT("c3:0x%2x%2x\n",c3.bytes[0],c3.bytes[1]);
-		DBG_PRINT("c4:0x%2x%2x\n",c4.bytes[0],c4.bytes[1]);
-		DBG_PRINT("c5:0x%2x%2x\n",c5.bytes[0],c5.bytes[1]);
-		DBG_PRINT("c6:0x%2x%2x\n",c6.bytes[0],c6.bytes[1]);
+	IICreadBytes( ms5611Address, 0xA8, 2, data);    // Read Calibration Data C4
+	c4.bytes[1] = data[0];
+	c4.bytes[0] = data[1];
 
-    #if   (OSR ==  256)
-				IICwriteOneByte( ms5611Address, 0x50);  // Request temperature conversion
-		#elif (OSR ==  512)
-				IICwriteOneByte( ms5611Address, 0x52);
-		#elif (OSR == 1024)
-				IICwriteOneByte( ms5611Address, 0x54);
-		#elif (OSR == 2048)
-				IICwriteOneByte( ms5611Address, 0x56);
-		#elif (OSR == 4096)
-				IICwriteOneByte( ms5611Address, 0x58);
-    #endif
+	IICreadBytes( ms5611Address, 0xAA, 2, data);    // Read Calibration Data C5
+	c5.bytes[1] = data[0];
+	c5.bytes[0] = data[1];
+
+	IICreadBytes( ms5611Address, 0xAC, 2, data);    // Read Calibration Data C6
+	c6.bytes[1] = data[0];
+	c6.bytes[0] = data[1];
+
+	DBG_PRINT("c1:0x%2x%2x\n",c1.bytes[0],c1.bytes[1]);
+	DBG_PRINT("c2:0x%2x%2x\n",c2.bytes[0],c2.bytes[1]);
+	DBG_PRINT("c3:0x%2x%2x\n",c3.bytes[0],c3.bytes[1]);
+	DBG_PRINT("c4:0x%2x%2x\n",c4.bytes[0],c4.bytes[1]);
+	DBG_PRINT("c5:0x%2x%2x\n",c5.bytes[0],c5.bytes[1]);
+	DBG_PRINT("c6:0x%2x%2x\n",c6.bytes[0],c6.bytes[1]);
+
+#if   (OSR ==  256)
+	IICwriteOneByte( ms5611Address, 0x50);  // Request temperature conversion
+#elif (OSR ==  512)
+	IICwriteOneByte( ms5611Address, 0x52);
+#elif (OSR == 1024)
+	IICwriteOneByte( ms5611Address, 0x54);
+#elif (OSR == 2048)
+	IICwriteOneByte( ms5611Address, 0x56);
+#elif (OSR == 4096)
+	IICwriteOneByte( ms5611Address, 0x58);
+#endif
 
 
-    delay_ms(10);
+	delay_ms(10);
 
-    readTemperatureRequestPressure();
-    delay_ms(10);
+	readTemperatureRequestPressure();
+	delay_ms(10);
 
-    readPressureRequestTemperature();
-    delay_ms(10);
+	readPressureRequestTemperature();
+	delay_ms(10);
 
-    d1Value = d1.value;
-    d2Value = d2.value;
+	d1Value = d1.value;
+	d2Value = d2.value;
 
-    calculateTemperature();
-    calculatePressureAltitude();
+	calculateTemperature();
+	calculatePressureAltitude();
 
-		DBG_PRINT("init pressure MS5611 finished\n");
+	DBG_PRINT("init pressure MS5611 finished\n");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
