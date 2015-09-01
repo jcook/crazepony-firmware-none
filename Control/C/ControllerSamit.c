@@ -20,43 +20,39 @@
 
 float pidUpdate(PidObject* pid, const float measured, const bool updateError)
 {
-    float output;
+	float output;
 
-    if (updateError)
-    {
-        pid->error = pid->desired - measured;
-    }
+	if (updateError) {
+		pid->error = pid->desired - measured;
+	}
 
-    pid->integ += pid->error * pid->dt;
-    if (pid->integ > pid->iLimit)
-    {
-        pid->integ = pid->iLimit;
-    }
-    else if (pid->integ < pid->iLimitLow)
-    {
-        pid->integ = pid->iLimitLow;
-    }
+	pid->integ += pid->error * pid->dt;
+	if (pid->integ > pid->iLimit) {
+		pid->integ = pid->iLimit;
+	} else if (pid->integ < pid->iLimitLow) {
+		pid->integ = pid->iLimitLow;
+	}
 
-    pid->deriv = (pid->error - pid->prevError) / pid->dt;
+	pid->deriv = (pid->error - pid->prevError) / pid->dt;
 
-    pid->outP = pid->kp * pid->error;
-    pid->outI = pid->ki * pid->integ;
-    pid->outD = pid->kd * pid->deriv;
+	pid->outP = pid->kp * pid->error;
+	pid->outI = pid->ki * pid->integ;
+	pid->outD = pid->kd * pid->deriv;
 
-    output = pid->outP + pid->outI + pid->outD;
+	output = pid->outP + pid->outI + pid->outD;
 
-    pid->prevError = pid->error;
+	pid->prevError = pid->error;
 
-    return output;
+	return output;
 }
 
 
 void pidReset(PidObject* pid)
 {
-  pid->error     = 0;
-  pid->prevError = 0;
-  pid->integ     = 0;
-  pid->deriv     = 0;
+	pid->error     = 0;
+	pid->prevError = 0;
+	pid->integ     = 0;
+	pid->deriv     = 0;
 }
 
 //----------------------------------------Atti Controller------------------------//
@@ -65,5 +61,5 @@ void AttiCtrlInit()
 {
 
 }
- 
+
 
