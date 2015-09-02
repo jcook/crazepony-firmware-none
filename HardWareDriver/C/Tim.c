@@ -72,8 +72,9 @@ void TIM3_IRQHandler(void)		//打印中断服务程序
 {
 	if( TIM_GetITStatus(TIM3 , TIM_IT_Update) != RESET ) {
 		DebugCounter++;
-		if( DebugCounter==500) {
+		if( DebugCounter==5000) {
 			DebugCounter=0;
+#if 0			
 			Q_printf(" ******************************************************************\r\n");
 			Q_printf(" *       ____                      _____                  +---+   *\r\n");
 			Q_printf(" *      / ___\\                     / __ \\                 | R |   *\r\n");
@@ -88,6 +89,7 @@ void TIM3_IRQHandler(void)		//打印中断服务程序
 			Q_printf(" ******************************************************************\r\n");
 			Q_printf("\r\n");
 			Q_printf("\r\n");
+#endif			
 			Q_printf(" Yaw ---> %5.2f degree\r\n",(float)imu.yaw);
 			Q_printf(" Pitch---> %5.2f degree\r\n",(float)imu.pitch);
 			Q_printf(" Roll ---> %5.2f degree\r\n",(float)imu.roll);
