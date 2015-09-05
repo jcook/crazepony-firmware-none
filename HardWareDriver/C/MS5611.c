@@ -38,6 +38,9 @@ uint8_t Baro_ALT_Updated = 0; //气压计高度更新完成标志。
 //单位 [温度 度] [气压 帕]  [高度 米]
 volatile float MS5611_Temperature,MS5611_Pressure,MS5611_Altitude,MS5611_VerticalSpeed;
 
+#define MAX(a, b)	(((a) > (b)) ? a : b)
+#define MIN(a, b)	(((a) > (b)) ? b : a)
+
 // 延时表单位 us 	  不同的采样精度对应不同的延时值
 uint32_t MS5611_Delay_us[9] = {
 	1500,//MS561101BA_OSR_256 0.9ms  0x00
@@ -234,6 +237,7 @@ float MS561101BA_get_altitude(void)
 		if(paInitCnt > PA_OFFSET_INIT_NUM) {
 			Alt_offset_Pa = paOffsetNum / paInitCnt;
 			paOffsetInited=1;
+			Q_printf("Alt_offset_Pa = %f\r\n", Alt_offset_Pa);
 		} else
 			paOffsetNum += MS5611_Pressure;
 
@@ -257,6 +261,7 @@ float MS561101BA_get_altitude(void)
 		MS5611_VerticalSpeed =  dz / dt;
 #endif
 
+
 	return Altitude;
 }
 
@@ -269,6 +274,13 @@ float MS561101BA_get_altitude(void)
 
 void MS561101BA_getPressure(void)
 {
+#ifdef MS5611_PRESS_CORR_1
+	static float last_press = 0, max_delta_press = 0;
+	float delta_press;
+#endif
+
+	float tmp;
+
 	int64_t off,sens;
 	int64_t TEMP,T2,Aux_64,OFF2,SENS2;  // 64 bits
 	int32_t rawPress = MS561101BA_getConversion();
@@ -309,13 +321,34 @@ void MS561101BA_getPressure(void)
 	//原始的方法
 	MS5611_Pressure = (((((int64_t)rawPress) * sens) >> 21) - off) / 32768;
 
+#ifdef MS5611_PRESS_CORR_1
+
+	if (last_press) {
+		delta_press = MAX(MS5611_Pressure, last_press) - MIN(MS5611_Pressure, last_press);
+
+		if (delta_press > max_delta_press) {
+			max_delta_press = delta_press;
+			Q_printf("update max delta %f\r\n", max_delta_press);
+		}
+
+		if (delta_press > MAX_DELTA_PRESS)
+			MS5611_Pressure = last_press;
+	}
+
+	last_press = MS5611_Pressure;
+#endif
+
 	//温度队列处理
 	MS561101BA_NewTemp(TEMP*0.01f);
 
 	MS5611_Temperature = MS561101BA_getAvg(Temp_buffer,MOVAVG_SIZE); //0.01c
 
-	MS5611_Altitude = MS561101BA_get_altitude(); // 单位：m
-
+	tmp = MS561101BA_get_altitude(); // 单位：m
+#ifdef MS5611_IGNORE_NEG
+	/* should not be neg value. */
+	if (tmp > 0)
+#endif
+	MS5611_Altitude = tmp;
 }
 
 
@@ -366,6 +399,7 @@ void MS5611_ThreadNew(void)
 	switch(Now_doing) {
 		//查询状态 看看我们现在 该做些什么？
 	case SCTemperature:  //启动温度转换
+
 		//开启温度转换
 		MS561101BA_startConversion(MS561101BA_D2 + MS5611Temp_OSR);
 		Current_delay = MS5611_Delay_us[MS5611Temp_OSR] ;//转换时间
