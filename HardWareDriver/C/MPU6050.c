@@ -192,11 +192,11 @@ void MPU6050_initialize(void)
 	IICwriteByte(devAddr, MPU6050_RA_PWR_MGMT_1, 0x03);      //PWR_MGMT_1    -- SLEEP 0; CYCLE 0; TEMP_DIS 0; CLKSEL 3 (PLL with Z Gyro reference)
 	IICwriteByte(devAddr, MPU6050_RA_INT_PIN_CFG, 0 << 7 | 0 << 6 | 0 << 5 | 0 << 4 | 0 << 3 | 0 << 2 | 1 << 1 | 0 << 0);  // INT_PIN_CFG   -- INT_LEVEL_HIGH, INT_OPEN_DIS, LATCH_INT_DIS, INT_RD_CLEAR_DIS, FSYNC_INT_LEVEL_HIGH, FSYNC_INT_DIS, I2C_BYPASS_EN, CLOCK_DIS
 	IICwriteByte(devAddr, MPU6050_RA_CONFIG, MPU6050_DLPF_BW_42);  //CONFIG        -- EXT_SYNC_SET 0 (disable input pin for data sync) ; default DLPF_CFG = 0 => ACC bandwidth = 260Hz  GYRO bandwidth = 256Hz)
-	MPU6050_setFullScaleGyroRange(MPU6050_GYRO_FS_2000);
-	// Accel scale 8g (4096 LSB/g)
-	IICwriteByte(devAddr, MPU6050_RA_ACCEL_CONFIG, 2 << 3);
 
-
+	// default is Gyro scale 2000 degree/s
+	MPU6050_setFullScaleGyroRange(MPU6050_GYRO_SEL);
+	// default is Accel scale 8g (4096 LSB/g)
+	MPU6050_setFullScaleAccelRange(MPU6050_ACCL_SEL);
 }
 //读acc
 void MPU6050AccRead(int16_t *accData)

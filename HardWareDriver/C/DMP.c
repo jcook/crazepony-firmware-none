@@ -331,7 +331,8 @@ uint8_t MPU6050_DMP_Initialize(void)
 			//Q_printf(("设置DLPF带宽为42Hz...\r\n"));
 			MPU6050_setDLPFMode(MPU6050_DLPF_BW_42);
 			//Q_printf(("设置角速度精度为 +/- 2000 deg/sec...\r\n"));
-			MPU6050_setFullScaleGyroRange(MPU6050_GYRO_FS_2000);
+			MPU6050_setFullScaleGyroRange(MPU6050_GYRO_SEL);
+			MPU6050_setFullScaleAccelRange(MPU6050_ACCL_SEL);
 			//Q_printf(("设置DMP配置字节...\r\n"));
 			MPU6050_setDMPConfig1(0x03);
 			MPU6050_setDMPConfig2(0x00);

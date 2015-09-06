@@ -124,7 +124,6 @@ uint8_t IMU_Calibrate(void)
 			}
 
 			imu.accOffset[2]=imu.accOffset[2] - CONSTANTS_ONE_G;
-
 			calibrating=0;
 #ifndef IMU_SW
 			imu.ready=1;
@@ -170,11 +169,7 @@ uint8_t IMU_Calibrate(void)
 }
 
 
-//
-#define SENSOR_MAX_G 8.0f		//constant g		// tobe fixed to 8g. but IMU need to  correct at the same time
-#define SENSOR_MAX_W 2000.0f	//deg/s
-#define ACC_SCALE  (SENSOR_MAX_G/32768.0f)
-#define GYRO_SCALE  (SENSOR_MAX_W/32768.0f)
+
 void ReadIMUSensorHandle(void)
 {
 	uint8_t i;
@@ -183,7 +178,7 @@ void ReadIMUSensorHandle(void)
 	MPU6050GyroRead(imu.gyroADC);
 	//tutn to physical
 	for(i=0; i<3; i++) {
-		imu.accRaw[i]= (float)imu.accADC[i] *ACC_SCALE * CONSTANTS_ONE_G ;
+		imu.accRaw[i]= (float)imu.accADC[i] *ACCL_SCALE * CONSTANTS_ONE_G ;
 		imu.gyroRaw[i]=(float)imu.gyroADC[i] * GYRO_SCALE * M_PI_F /180.f;		//deg/s
 	}
 
@@ -227,7 +222,7 @@ uint8_t IMUCheck(void)
 		MPU6050AccRead(imu.accADC);
 		accZSum += imu.accADC[2];
 	}
-	imu.accRaw[2]= (float)(accZSum /(float)CHECK_TIME) *ACC_SCALE * CONSTANTS_ONE_G ;
+	imu.accRaw[2]= (float)(accZSum /(float)CHECK_TIME) *ACCL_SCALE * CONSTANTS_ONE_G ;
 	accZb=imu.accRaw[2]-imu.accOffset[2];
 
 	if((accZb > CONSTANTS_ONE_G-ACCZ_ERR_MAX ) && (accZb < CONSTANTS_ONE_G + ACCZ_ERR_MAX))
@@ -235,6 +230,7 @@ uint8_t IMUCheck(void)
 	else
 		imu.caliPass=0;
 
+	Q_printf("IMU CK = %d, %f, %f\r\n", imu.caliPass, imu.accRaw[2], imu.accOffset[2]);
 	return imu.caliPass;
 
 }

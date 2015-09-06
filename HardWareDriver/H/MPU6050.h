@@ -357,8 +357,20 @@
 #define MPU6050_DMP_MEMORY_CHUNK_SIZE   16
 
 
+//
+#define MPU6050_ACCL_SEL	MPU6050_ACCEL_FS_8
+#define MPU6050_GYRO_SEL	MPU6050_GYRO_FS_2000
 
-
+/*
+ * for ACCL, the formula is POW(2, MPU6050_ACCL_SEL+1)
+ * for GYRO, the formula is 250.0f * pow(2, MPU6050_GYRO_SEL)
+ *
+ * Keeping update then when MPU6050_ACCL_SEL/MPU6050_GYRO_SEL changed if we calculate them manually.
+ */
+#define ACCL_SCALE  (pow(2, MPU6050_ACCL_SEL+1) / 32768.0f)
+#define GYRO_SCALE  (250.0f * pow(2, MPU6050_GYRO_SEL) / 32768.0f)
+//#define ACCL_SCALE  (8.0f / 32768.0f)
+//#define GYRO_SCALE  (2000.0f / 32768.0f)
 
 extern float Acc1G_Values;
 extern uint8_t buffer[14];
@@ -386,6 +398,7 @@ void MPU6050_setClockSource(uint8_t source);
 void MPU6050_setDLPFMode(uint8_t mode);
 void MPU6050_setExternalFrameSync(uint8_t sync);
 void MPU6050_setFullScaleGyroRange(uint8_t range);
+void MPU6050_setFullScaleAccelRange(uint8_t range);
 void MPU6050_setDMPConfig1(uint8_t config);
 void MPU6050_setDMPConfig2(uint8_t config);
 void MPU6050_setOTPBankValid(uint8_t enabled);
@@ -418,6 +431,7 @@ void MPU6050_setI2CBypassEnabled(uint8_t enabled);
 void MPU6050_Check(void);
 void MPU6050_setGyroOffset(int16_t offset[3]);
 void MPU6050_setAccOffset(int16_t offset[3]);
+
 #endif
 
 
