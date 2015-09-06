@@ -12,13 +12,13 @@
 //#define STOP_MOTOR_FOREVER
 
 #define UART_DEBUG		//开启改宏，则可以使用串口助手打印调试。否则使用Crazepony上位机
-//#define SERIALCHART_OUTPUT	// enable for serialchart output
+#define SERIALCHART_OUTPUT	// enable for serialchart output
 
-#define SERIALCHART_OUTPUT_MASK		SSERIALCHART_OUTPUT_ACCL
-#define SSERIALCHART_OUTPUT_ACCL	0x01
-#define SSERIALCHART_OUTPUT_GYRO	0x02
-#define SSERIALCHART_OUTPUT_TEMP	0x04
-#define SSERIALCHART_OUTPUT_PRESS	0x08
+#define SERIALCHART_OUTPUT_MASK		SC_MASK_PRESS
+#define SC_MASK_ACCL			0x01
+#define SC_MASK_GYRO			0x02
+#define SC_MASK_TEMP			0x04
+#define SC_MASK_PRESS			0x08
 
 enum {SRC_PC,SRC_APP};
 extern uint8_t btSrc;

@@ -348,6 +348,7 @@ void MS561101BA_getPressure(void)
 	/* should not be neg value. */
 	if (tmp > 0)
 #endif
+	sdbg(SC_MASK_PRESS, "%f,%f\r\n", MS5611_Pressure, tmp);
 	MS5611_Altitude = tmp;
 }
 
