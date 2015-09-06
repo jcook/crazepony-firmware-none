@@ -5,15 +5,21 @@
 
 #define AUTO_MW
 #define YAW_CORRECT
-#define IMU_SW		//姿态解算使用软件解算，不再使用MPU6050的硬件解算单元DMP
+//#define IMU_SW		//姿态解算使用软件解算，不再使用MPU6050的硬件解算单元DMP
 #define HIGH_FREQ_CTRL
 #define NEW_RC
 #define lostRC_Landing
 //#define STOP_MOTOR_FOREVER
 
-#define UART_DEBUG	//开启改宏，则可以使用串口助手打印调试。否则使用Crazepony上位机
+#define UART_DEBUG		//开启改宏，则可以使用串口助手打印调试。否则使用Crazepony上位机
+//#define SERIALCHART_OUTPUT	// enable for serialchart output
 
- 
+#define SERIALCHART_OUTPUT_MASK		SSERIALCHART_OUTPUT_ACCL
+#define SSERIALCHART_OUTPUT_ACCL	0x01
+#define SSERIALCHART_OUTPUT_GYRO	0x02
+#define SSERIALCHART_OUTPUT_TEMP	0x04
+#define SSERIALCHART_OUTPUT_PRESS	0x08
+
 enum {SRC_PC,SRC_APP};
 extern uint8_t btSrc;
 //
@@ -27,6 +33,23 @@ extern uint8_t btSrc;
 #else
 #define	Q_printf(msg...)
 #endif
+
+#if defined(UART_DEBUG) && defined(SERIALCHART_OUTPUT)
+#ifdef Q_printf
+#undef Q_printf
+#endif
+#define Q_printf(msg...)	// enabling serialchart will disable other normal output.
+
+/* use this function for serialchart output! */
+#define sdbg(mask, msg...)			\
+	if (mask & SERIALCHART_OUTPUT_MASK) {	\
+		printf(msg);			\
+	}
+#else
+#define sdbg(mask, msg...)	
+#endif
+
+
 
 /* --------------------------------------------- *
  *   adjustment / tuning / optimization          *
