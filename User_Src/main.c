@@ -37,6 +37,8 @@ uint16_t  batCnt;
 uint32_t startTime[5],execTime[5];
 uint32_t realExecPrd[5];	//us , real called period in different loop
 
+extern float Alt_offset_Pa;
+
 /********************************************
               飞控主函数入口
 功能：
@@ -148,6 +150,9 @@ int main(void)
 					imuCaliFlag=0;
 					gParamsSaveEEPROMRequset=1;	//请求记录到EEPROM
 					imu.caliPass=1;
+					
+					/* triggle MS5611 reset */
+					Alt_offset_Pa = 0;
 				}
 			}
 
