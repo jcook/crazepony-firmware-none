@@ -24,12 +24,13 @@ static int32_t  tempCache;
 
 static float Alt_Offset_m = 0;
 
+#define TEST_PORTING
+
 //
 #define PA_OFFSET_INIT_NUM 50
 
-static float Alt_offset_Pa=0; //存放着0米(离起飞所在平面)时 对应的气压值  这个值存放上电时的气压值
-double paOffsetNum = 0;
-uint16_t  paInitCnt=0;
+float Alt_offset_Pa=0; //存放着0米(离起飞所在平面)时 对应的气压值  这个值存放上电时的气压值
+
 uint8_t paOffsetInited=0;
 
 //interface for outside
@@ -218,39 +219,54 @@ void MS561101BA_GetTemperature(void)
 	tempCache = MS561101BA_getConversion();
 }
 
-
 /**************************实现函数********************************************
 *函数原型:		float MS561101BA_get_altitude(void)
 *功　　能:	    将当前的气压值转成 高度。
 *******************************************************************************/
 float MS561101BA_get_altitude(void)
 {
-	static float Altitude;
+	static uint16_t paInitCnt = 0;
+	static double paOffsetNum = 0;
+
+	float Altitude = 0;
 #ifdef ALTI_SPEED
 	static float AltPre;
 	float dz,dt;
 	uint32_t current=0;
 	static uint32_t tp=0;
 #endif
-	// 是否初始化过0米气压值？
+	float orig_alt;
+	
+	// 是否初始化过0米气压值?
 	if(Alt_offset_Pa == 0) {
-		if(paInitCnt > PA_OFFSET_INIT_NUM) {
-			Alt_offset_Pa = paOffsetNum / paInitCnt;
-			paOffsetInited=1;
-			Q_printf("Alt_offset_Pa = %f\r\n", Alt_offset_Pa);
-		} else
+		if(paInitCnt > PA_OFFSET_INIT_NUM) {			
+			Alt_offset_Pa = paOffsetNum / (paInitCnt - MOVAVG_SIZE - 1);
+			paOffsetInited = 1;
+			
+			/* reset for next calibration. */
+			paInitCnt = 0;
+			paOffsetNum = 0;
+			printf("Alt_offset_Pa = %f,%d\r\n", Alt_offset_Pa, paInitCnt);
+		} else if (paInitCnt > MOVAVG_SIZE) {
+			/* waiting for array getting stable. */
 			paOffsetNum += MS5611_Pressure;
+		}
 
 		paInitCnt++;
-
-		Altitude = 0; //高度 为 0
-
+		
 		return Altitude;
 	}
 	//计算相对于上电时的位置的高度值 。单位为m
-	Altitude = 4433000.0 * (1 - pow((MS5611_Pressure / Alt_offset_Pa), 0.1903))*0.01f;
-	Altitude = Altitude + Alt_Offset_m ;  //加偏置
-
+	orig_alt = Altitude = 4433000.0 * (1 - pow((MS5611_Pressure / Alt_offset_Pa), 0.1903))*0.01f;
+	orig_alt = Altitude = orig_alt + Alt_Offset_m ;  //加偏置
+	
+#ifdef MS5611_AVG_RESULT	
+	MS561101BA_NewAlt(orig_alt);
+	Altitude = MS561101BA_getAvg(Alt_buffer,MOVAVG_SIZE);
+#endif
+	
+	sdbg(SC_MASK_PRESS, "%f,%f\r\n", orig_alt, Altitude);
+	
 #ifdef ALTI_SPEED
 	current=micros();
 	dt=(tp>0)?((current - tp)/1000000.0f):0;
@@ -261,8 +277,11 @@ float MS561101BA_get_altitude(void)
 		MS5611_VerticalSpeed =  dz / dt;
 #endif
 
-
+#ifdef MS5611_IGNORE_NEG	
+	return Altitude > 0 ? Altitude : 0;
+#else
 	return Altitude;
+#endif	
 }
 
 /**************************实现函数********************************************
@@ -275,11 +294,11 @@ float MS561101BA_get_altitude(void)
 void MS561101BA_getPressure(void)
 {
 #ifdef MS5611_PRESS_CORR_1
-	static float last_press = 0, max_delta_press = 0;
+	static float last_press = 0, max_delta_press = 3;
 	float delta_press;
+	static uint8_t match_max_cnt = 0;
 #endif
-
-	float tmp;
+	float orig_press;
 
 	int64_t off,sens;
 	int64_t TEMP,T2,Aux_64,OFF2,SENS2;  // 64 bits
@@ -319,37 +338,23 @@ void MS561101BA_getPressure(void)
 //	MS5611_Pressure = newPress;
 
 	//原始的方法
-	MS5611_Pressure = (((((int64_t)rawPress) * sens) >> 21) - off) / 32768;
+	orig_press = MS5611_Pressure = (((((int64_t)rawPress) * sens) >> 21) - off) / 32768;
 
-#ifdef MS5611_PRESS_CORR_1
-
-	if (last_press) {
-		delta_press = MAX(MS5611_Pressure, last_press) - MIN(MS5611_Pressure, last_press);
-
-		if (delta_press > max_delta_press) {
-			max_delta_press = delta_press;
-			Q_printf("update max delta %f\r\n", max_delta_press);
-		}
-
-		if (delta_press > MAX_DELTA_PRESS)
-			MS5611_Pressure = last_press;
-	}
-
-	last_press = MS5611_Pressure;
+#ifdef MS5611_AVG_RESULT
+	MS561101BA_NewPress(orig_press);	
+	MS5611_Pressure = MS561101BA_getAvg(Press_buffer, MOVAVG_SIZE);
 #endif
+	//sdbg(SC_MASK_PRESS, "%f,%f\r\n", orig_press, MS5611_Pressure); 
 
+
+	//sdbg(SC_MASK_PRESS, "%f,%f,%f\r\n", orig, MS5611_Pressure, MS561101BA_getAvg_noBorder(Press_buffer,MOVAVG_SIZE));
+	
 	//温度队列处理
 	MS561101BA_NewTemp(TEMP*0.01f);
 
 	MS5611_Temperature = MS561101BA_getAvg(Temp_buffer,MOVAVG_SIZE); //0.01c
 
-	tmp = MS561101BA_get_altitude(); // 单位：m
-#ifdef MS5611_IGNORE_NEG
-	/* should not be neg value. */
-	if (tmp > 0)
-#endif
-	sdbg(SC_MASK_PRESS, "%f,%f\r\n", MS5611_Pressure, tmp);
-	MS5611_Altitude = tmp;
+	MS5611_Altitude = MS561101BA_get_altitude(); // 单位：m
 }
 
 
