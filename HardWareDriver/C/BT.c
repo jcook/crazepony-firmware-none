@@ -129,11 +129,12 @@ u32 BT_Scan_Buad(void)
 		UART1_init(SysClock,bandsel[i]);
 		Uart1SendaBTCmd(ATcmdAsk);
 		if(CmdJudgement(ATcmdAnswer) == true) {
+			Q_printf("BT Scan %d\r\n", bandsel[i]);
 			return bandsel[i];
 		}
 	}
 
-	return 115200;
+	return 0;
 }
 
 /********************************************
@@ -151,10 +152,15 @@ void BT_ATcmdWrite(void)
 		return ;
 	}
 
-	Q_printf("BT baund check and init begin.Q_printf is useless.\r\n\r\n");
+	Q_printf("BT baund check and init begin. Q_printf is useless.\r\n\r\n");
 
 	BT_CurBaud = BT_Scan_Buad();
 
+	if (BT_CurBaud == 0) {
+		Q_printf("BT scan buad failed!\r\n");
+		goto quit;
+	
+	}
 
 	//首先检测蓝牙模块的串口是否已经配置为115200
 	if(BT_CurBaud != BT_BAUD_Set) {
@@ -188,9 +194,9 @@ void BT_ATcmdWrite(void)
 		//已经是115200，可以直接通信
 		Q_printf("BT module baud is 115200 okay\r\n");
 	}
-
+quit:
 	//最终STM32的UART波特率设置回115200
-	UART1_init(SysClock,BT_BAUD_Set);
+	UART1_init(SysClock, BT_BAUD_Set);
 
 	Q_printf("\r\nBT baund check and init end.\r\n");
 
