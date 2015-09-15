@@ -260,12 +260,13 @@ float MS561101BA_get_altitude(void)
 	orig_alt = Altitude = 4433000.0 * (1 - pow((MS5611_Pressure / Alt_offset_Pa), 0.1903))*0.01f;
 	orig_alt = Altitude = orig_alt + Alt_Offset_m ;  //加偏置
 	
-#ifdef MS5611_AVG_RESULT	
-	MS561101BA_NewAlt(orig_alt);
-	Altitude = MS561101BA_getAvg(Alt_buffer,MOVAVG_SIZE);
+#ifdef MS5611_AVG_RESULT
+	/* TODO: Below actions are costing time so much. Try to optimize it. */
+//	MS561101BA_NewAlt(orig_alt);
+//	Altitude = MS561101BA_getAvg(Alt_buffer,MOVAVG_SIZE);
+	sdbg(SC_MASK_PRESS, "%f,%f\r\n", orig_alt, Altitude);	
 #endif
-	
-	sdbg(SC_MASK_PRESS, "%f,%f\r\n", orig_alt, Altitude);
+
 	
 #ifdef ALTI_SPEED
 	current=micros();
