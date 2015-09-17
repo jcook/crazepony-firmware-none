@@ -3,6 +3,8 @@
 
 #include <math.h>
 
+#include "SysConfig.h"
+
 #ifdef HIGH_FREQ_CTRL
 #define IMU_SAMPLE_RATE 			200.0f
 #else

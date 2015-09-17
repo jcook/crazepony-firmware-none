@@ -6,7 +6,7 @@
 #define AUTO_MW
 #define YAW_CORRECT
 #define IMU_SW		//姿态解算使用软件解算，不再使用MPU6050的硬件解算单元DMP
-#define HIGH_FREQ_CTRL
+//#define HIGH_FREQ_CTRL  /* I found this HIGH freq does not work well. So for now disable it by default. */
 #define NEW_RC
 #define lostRC_Landing
 //#define STOP_MOTOR_FOREVER

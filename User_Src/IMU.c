@@ -17,8 +17,6 @@ Author:		祥 、小马
 #include "DMP.h"
 #include "imu.h"
 #include "filter.h"
-#include "SysConfig.h"
-
 
 imu_t imu= {0};
 uint8_t imuCaliFlag=0;
